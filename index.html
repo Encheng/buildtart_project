@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuildTart 築塔</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <h1 class="logo">BuildTart 築塔</h1>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="#products" class="nav-link">今日甜點</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#order" class="nav-link">線上訂購</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#about" class="nav-link">關於我們</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h2>每日手作甜點</h2>
+                <p>精選當日新鮮製作的美味甜點</p>
+                <button class="cta-button" onclick="scrollToProducts()">查看今日甜點</button>
+            </div>
+        </section>
+
+        <section id="products" class="products-section">
+            <div class="container">
+                <h2>今日甜點</h2>
+                <div class="date-selector">
+                    <label for="dateSelect">選擇日期：</label>
+                    <input type="date" id="dateSelect" onchange="loadProducts()">
+                </div>
+                <div id="productsContainer" class="products-grid">
+                    <div class="loading">載入中...</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="order" class="order-section">
+            <div class="container">
+                <h2>線上訂購</h2>
+                <div class="order-form-container">
+                    <form id="orderForm" class="order-form">
+                        <div class="form-group">
+                            <label for="customerName">姓名 *</label>
+                            <input type="text" id="customerName" name="customerName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="customerPhone">電話 *</label>
+                            <input type="tel" id="customerPhone" name="customerPhone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="customerEmail">Email</label>
+                            <input type="email" id="customerEmail" name="customerEmail">
+                        </div>
+                        <div class="form-group">
+                            <label for="pickupDate">取貨日期 *</label>
+                            <input type="date" id="pickupDate" name="pickupDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pickupTime">取貨時間 *</label>
+                            <select id="pickupTime" name="pickupTime" required>
+                                <option value="">請選擇時間</option>
+                                <option value="09:00">09:00</option>
+                                <option value="10:00">10:00</option>
+                                <option value="11:00">11:00</option>
+                                <option value="12:00">12:00</option>
+                                <option value="13:00">13:00</option>
+                                <option value="14:00">14:00</option>
+                                <option value="15:00">15:00</option>
+                                <option value="16:00">16:00</option>
+                                <option value="17:00">17:00</option>
+                                <option value="18:00">18:00</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>訂購項目</label>
+                            <div id="orderItems" class="order-items">
+                                <!-- 訂購項目將由 JavaScript 動態生成 -->
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="specialRequests">特殊需求</label>
+                            <textarea id="specialRequests" name="specialRequests" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <div class="total-amount">
+                                <strong>總金額：NT$ <span id="totalAmount">0</span></strong>
+                            </div>
+                        </div>
+                        <button type="submit" class="submit-button">提交訂單</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="about-section">
+            <div class="container">
+                <h2>關於我們</h2>
+                <div class="about-content">
+                    <p>BuildTart 築塔致力於提供最新鮮、最美味的手作甜點。我們每天精心製作各種蛋糕和甜品，讓您享受最純粹的甜蜜時光。</p>
+                    <p>我們堅持使用優質食材，並採用傳統工藝製作每一份甜點，確保每一口都是完美的味覺體驗。</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 BuildTart 築塔. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="hybrid-script.js"></script>
+</body>
+</html>
