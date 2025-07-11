@@ -39,10 +39,27 @@ body {
     padding: 0 20px;
 }
 
-.logo {
+/* Logo 容器 */
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-image {
+    height: 45px;
+    width: auto;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 2px solid #ffd700;
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+}
+
+.logo-text {
     font-size: 1.8rem;
     font-weight: bold;
     color: #ffd700;
+    margin: 0;
 }
 
 .nav-menu {
@@ -60,6 +77,35 @@ body {
 
 .nav-link:hover {
     color: #ffd700;
+}
+
+/* Instagram 社群連結 */
+.social-link {
+    margin-left: 1rem;
+}
+
+.instagram-link {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    transition: all 0.3s ease;
+}
+
+.instagram-link:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(240, 148, 51, 0.4);
+}
+
+.instagram-icon {
+    width: 20px;
+    height: 20px;
+    color: white;
+}
+
+.instagram-link:hover .instagram-icon {
+    color: white;
 }
 
 /* Hero Section */
@@ -219,6 +265,138 @@ body {
 .add-to-order-btn:disabled {
     background-color: #6c757d;
     cursor: not-allowed;
+}
+
+/* 購物流程 Section */
+.how-to-order-section {
+    padding: 80px 0;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.how-to-order-section h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+    color: #2c3e50;
+    font-weight: bold;
+}
+
+/* 流程設計 */
+.process-flow {
+    margin-bottom: 4rem;
+}
+
+.flow-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 3rem;
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.flow-step {
+    flex: 1;
+    text-align: center;
+    padding: 0 10px;
+    position: relative;
+}
+
+.step-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin: 0 auto 1rem;
+    font-size: 0.9rem;
+}
+
+.step-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 1rem;
+    padding: 15px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.step-icon.shopping-cart {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+}
+
+.step-icon.confirm-order {
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    color: white;
+}
+
+.step-icon.member-login {
+    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+    color: white;
+}
+
+.step-icon.order-confirm {
+    background: linear-gradient(135deg, #e67e22, #d35400);
+    color: white;
+}
+
+.step-icon.complete-order {
+    background: linear-gradient(135deg, #27ae60, #229954);
+    color: white;
+}
+
+.step-icon.shipping {
+    background: linear-gradient(135deg, #f1c40f, #f39c12);
+    color: white;
+}
+
+.step-icon.receive-goods {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+}
+
+.step-icon svg {
+    width: 30px;
+    height: 30px;
+}
+
+.flow-step h3 {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.flow-step p {
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: #5a6c7d;
+}
+
+.highlight-text {
+    color: #e67e22;
+    font-weight: bold;
+}
+
+.flow-arrow {
+    display: flex;
+    align-items: center;
+    font-size: 1.5rem;
+    color: #bdc3c7;
+    margin: 0 10px;
+    margin-top: 50px;
+}
+
+.flow-arrow-reverse {
+    transform: scaleX(-1);
 }
 
 /* Order Section */
@@ -423,8 +601,26 @@ footer {
         gap: 1rem;
     }
     
+    .logo-container {
+        gap: 8px;
+    }
+    
+    .logo-image {
+        height: 35px;
+    }
+    
+    .logo-text {
+        font-size: 1.5rem;
+    }
+    
     .nav-menu {
         gap: 1rem;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .social-link {
+        margin-left: 0;
     }
     
     .hero {
@@ -451,6 +647,50 @@ footer {
     
     .quantity-controls {
         align-self: flex-end;
+    }
+    
+    /* 購物流程響應式 */
+    .how-to-order-section h2 {
+        font-size: 2rem;
+    }
+    
+    .flow-row {
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+    }
+    
+    .flow-step {
+        max-width: 280px;
+        padding: 0;
+    }
+    
+    .flow-arrow {
+        transform: rotate(90deg);
+        margin: 0;
+    }
+    
+    .flow-arrow-reverse {
+        transform: rotate(90deg);
+    }
+    
+    .step-icon {
+        width: 50px;
+        height: 50px;
+        padding: 12px;
+    }
+    
+    .step-icon svg {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .flow-step h3 {
+        font-size: 1rem;
+    }
+    
+    .flow-step p {
+        font-size: 0.8rem;
     }
 }
 
