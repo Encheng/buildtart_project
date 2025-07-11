@@ -12,6 +12,7 @@ let totalAmount = 0;
 // DOM 載入完成後初始化
 document.addEventListener('DOMContentLoaded', function() {
     initializePage();
+    updateCurrentYear();
 });
 
 // 初始化頁面
@@ -397,4 +398,13 @@ function formatDisplayDate(dateString) {
         day: '2-digit',
         weekday: 'short'
     });
+}
+
+// 更新footer年份
+function updateCurrentYear() {
+    const currentYear = new Date().getFullYear();
+    const yearElement = document.getElementById('currentYear');
+    if (yearElement) {
+        yearElement.textContent = currentYear;
+    }
 }

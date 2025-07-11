@@ -2,5 +2,6 @@ security-guide.md
 setup-guide.md
 domain-secure-apps-script.gs
 google-apps-script.gs
+/un-use
 
 !.gitignore
