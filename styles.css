@@ -8,8 +8,8 @@
 body {
     font-family: 'Arial', sans-serif;
     line-height: 1.6;
-    color: #333;
-    background-color: #faf8f5;
+    color: #5D4E37;
+    background-color: #F5F2EA;
 }
 
 .container {
@@ -20,14 +20,14 @@ body {
 
 /* Header Styles */
 .navbar {
-    background-color: #8b4513;
+    background-color: #8B7355;
     color: white;
     padding: 1rem 0;
     position: fixed;
     width: 100%;
     top: 0;
     z-index: 1000;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 10px rgba(139, 115, 85, 0.3);
 }
 
 .nav-container {
@@ -51,15 +51,17 @@ body {
     width: auto;
     border-radius: 8px;
     object-fit: cover;
-    border: 2px solid #ffd700;
-    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+    border: 2px solid #D4C4A8;
+    box-shadow: 0 2px 8px rgba(212, 196, 168, 0.4);
 }
 
 .logo-text {
+    font-family: 'Noto Serif TC', 'Times New Roman', serif;
     font-size: 1.8rem;
-    font-weight: bold;
-    color: #ffd700;
+    font-weight: 700;
+    color: #D4C4A8;
     margin: 0;
+    letter-spacing: 1.5px;
 }
 
 .nav-menu {
@@ -76,7 +78,7 @@ body {
 }
 
 .nav-link:hover {
-    color: #ffd700;
+    color: #D4C4A8;
 }
 
 /* Instagram 社群連結 */
@@ -110,7 +112,7 @@ body {
 
 /* Hero Section */
 .hero {
-    background: linear-gradient(135deg, #f4e4c1 0%, #e8d5b7 100%);
+    background: linear-gradient(135deg, #F5F2EA 0%, #E8E0D0 100%);
     padding: 120px 0 80px;
     text-align: center;
     margin-top: 80px;
@@ -119,17 +121,17 @@ body {
 .hero-content h2 {
     font-size: 3rem;
     margin-bottom: 1rem;
-    color: #8b4513;
+    color: #8B7355;
 }
 
 .hero-content p {
     font-size: 1.2rem;
     margin-bottom: 2rem;
-    color: #6b4423;
+    color: #5D4E37;
 }
 
 .cta-button {
-    background-color: #d2691e;
+    background-color: #8B7355;
     color: white;
     padding: 12px 30px;
     border: none;
@@ -140,7 +142,7 @@ body {
 }
 
 .cta-button:hover {
-    background-color: #b8590c;
+    background-color: #6F5A42;
 }
 
 /* Products Section */
@@ -153,7 +155,7 @@ body {
     text-align: center;
     font-size: 2.5rem;
     margin-bottom: 3rem;
-    color: #8b4513;
+    color: #8B7355;
 }
 
 .date-selector {
@@ -164,12 +166,12 @@ body {
 .date-selector label {
     font-size: 1.1rem;
     margin-right: 10px;
-    color: #8b4513;
+    color: #8B7355;
 }
 
 .date-selector input {
     padding: 8px 15px;
-    border: 2px solid #d2691e;
+    border: 2px solid #8B7355;
     border-radius: 5px;
     font-size: 1rem;
 }
@@ -196,12 +198,12 @@ body {
 .product-image {
     width: 100%;
     height: 200px;
-    background: linear-gradient(45deg, #f4e4c1, #e8d5b7);
+    background: linear-gradient(45deg, #F5F2EA, #E8E0D0);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 3rem;
-    color: #8b4513;
+    color: #8B7355;
 }
 
 .product-info {
@@ -211,7 +213,7 @@ body {
 .product-name {
     font-size: 1.3rem;
     font-weight: bold;
-    color: #8b4513;
+    color: #8B7355;
     margin-bottom: 0.5rem;
 }
 
@@ -224,7 +226,7 @@ body {
 .product-price {
     font-size: 1.2rem;
     font-weight: bold;
-    color: #d2691e;
+    color: #A0845C;
     margin-bottom: 0.5rem;
 }
 
@@ -270,14 +272,14 @@ body {
 /* 購物流程 Section */
 .how-to-order-section {
     padding: 80px 0;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    background: linear-gradient(135deg, #F5F2EA 0%, #E8E0D0 100%);
 }
 
 .how-to-order-section h2 {
     text-align: center;
     font-size: 2.5rem;
     margin-bottom: 3rem;
-    color: #2c3e50;
+    color: #8B7355;
     font-weight: bold;
 }
 
@@ -307,7 +309,7 @@ body {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #3498db, #2980b9);
+    background: linear-gradient(135deg, #8B7355, #6F5A42);
     color: white;
     display: flex;
     align-items: center;
@@ -371,14 +373,14 @@ body {
 .flow-step h3 {
     font-size: 1.1rem;
     font-weight: bold;
-    color: #2c3e50;
+    color: #8B7355;
     margin-bottom: 0.5rem;
 }
 
 .flow-step p {
     font-size: 0.85rem;
     line-height: 1.4;
-    color: #5a6c7d;
+    color: #5D4E37;
 }
 
 .highlight-text {
@@ -402,14 +404,14 @@ body {
 /* Order Section */
 .order-section {
     padding: 80px 0;
-    background-color: #faf8f5;
+    background-color: #F5F2EA;
 }
 
 .order-section h2 {
     text-align: center;
     font-size: 2.5rem;
     margin-bottom: 3rem;
-    color: #8b4513;
+    color: #8B7355;
 }
 
 .order-form-container {
@@ -429,7 +431,7 @@ body {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: bold;
-    color: #8b4513;
+    color: #8B7355;
 }
 
 .form-group input,
@@ -447,7 +449,7 @@ body {
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #d2691e;
+    border-color: #8B7355;
 }
 
 .order-items {
@@ -476,11 +478,11 @@ body {
 
 .item-name {
     font-weight: bold;
-    color: #8b4513;
+    color: #8B7355;
 }
 
 .item-price {
-    color: #d2691e;
+    color: #A0845C;
 }
 
 .quantity-controls {
@@ -490,7 +492,7 @@ body {
 }
 
 .quantity-btn {
-    background-color: #d2691e;
+    background-color: #8B7355;
     color: white;
     border: none;
     width: 30px;
@@ -504,7 +506,7 @@ body {
 }
 
 .quantity-btn:hover {
-    background-color: #b8590c;
+    background-color: #6F5A42;
 }
 
 .quantity-display {
@@ -530,10 +532,10 @@ body {
 .total-amount {
     text-align: right;
     font-size: 1.2rem;
-    color: #8b4513;
+    color: #8B7355;
     margin-top: 1rem;
     padding-top: 1rem;
-    border-top: 2px solid #ddd;
+    border-top: 2px solid #D4C4A8;
 }
 
 .submit-button {
@@ -562,7 +564,7 @@ body {
     text-align: center;
     font-size: 2.5rem;
     margin-bottom: 3rem;
-    color: #8b4513;
+    color: #8B7355;
 }
 
 .about-content {
@@ -580,7 +582,7 @@ body {
 
 /* Footer */
 footer {
-    background-color: #8b4513;
+    background-color: #8B7355;
     color: white;
     text-align: center;
     padding: 2rem 0;
@@ -590,7 +592,7 @@ footer {
 .loading {
     text-align: center;
     font-size: 1.2rem;
-    color: #8b4513;
+    color: #8B7355;
     padding: 2rem;
 }
 
@@ -600,95 +602,95 @@ footer {
         flex-direction: column;
         gap: 1rem;
     }
-    
+
     .logo-container {
         gap: 8px;
     }
-    
+
     .logo-image {
         height: 35px;
     }
-    
+
     .logo-text {
         font-size: 1.5rem;
     }
-    
+
     .nav-menu {
         gap: 1rem;
         align-items: center;
         justify-content: center;
     }
-    
+
     .social-link {
         margin-left: 0;
     }
-    
+
     .hero {
         padding: 100px 0 60px;
     }
-    
+
     .hero-content h2 {
         font-size: 2rem;
     }
-    
+
     .products-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .order-form-container {
         padding: 1rem;
     }
-    
+
     .order-item {
         flex-direction: column;
         align-items: flex-start;
         gap: 0.5rem;
     }
-    
+
     .quantity-controls {
         align-self: flex-end;
     }
-    
+
     /* 購物流程響應式 */
     .how-to-order-section h2 {
         font-size: 2rem;
     }
-    
+
     .flow-row {
         flex-direction: column;
         align-items: center;
         gap: 2rem;
     }
-    
+
     .flow-step {
         max-width: 280px;
         padding: 0;
     }
-    
+
     .flow-arrow {
         transform: rotate(90deg);
         margin: 0;
     }
-    
+
     .flow-arrow-reverse {
         transform: rotate(90deg);
     }
-    
+
     .step-icon {
         width: 50px;
         height: 50px;
         padding: 12px;
     }
-    
+
     .step-icon svg {
         width: 24px;
         height: 24px;
     }
-    
+
     .flow-step h3 {
         font-size: 1rem;
     }
-    
+
     .flow-step p {
         font-size: 0.8rem;
     }
@@ -698,11 +700,11 @@ footer {
     .container {
         padding: 0 10px;
     }
-    
+
     .hero-content h2 {
         font-size: 1.5rem;
     }
-    
+
     .products-section h2,
     .order-section h2,
     .about-section h2 {
