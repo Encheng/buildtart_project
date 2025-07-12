@@ -183,6 +183,15 @@ body {
     margin-top: 2rem;
 }
 
+/* 當只有載入動畫時，確保完全置中 */
+.products-grid .loading-container {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
 .product-card {
     background: white;
     border-radius: 15px;
@@ -198,6 +207,32 @@ body {
 .product-image {
     width: 100%;
     height: 200px;
+    background: linear-gradient(45deg, #F5F2EA, #E8E0D0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: #8B7355;
+    overflow: hidden;
+    position: relative;
+}
+
+.product-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    transition: transform 0.3s ease;
+    background: #F5F2EA;
+}
+
+.product-img:hover {
+    transform: scale(1.05);
+}
+
+.product-image-fallback {
+    width: 100%;
+    height: 100%;
     background: linear-gradient(45deg, #F5F2EA, #E8E0D0);
     display: flex;
     align-items: center;
@@ -594,6 +629,154 @@ footer {
     font-size: 1.2rem;
     color: #8B7355;
     padding: 2rem;
+}
+
+/* Enhanced Loading Animation */
+.loading-container {
+    padding: 3rem 2rem;
+    min-height: 200px;
+    text-align: center;
+}
+
+.loading-animation {
+    text-align: center;
+    max-width: 300px;
+}
+
+/* Cake Loader */
+.cake-loader {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    animation: bounceLoader 2s ease-in-out infinite;
+}
+
+.cake-layer {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    animation: stackLayers 3s ease-in-out infinite;
+}
+
+.layer-1 {
+    bottom: 0;
+    width: 80px;
+    height: 25px;
+    background: linear-gradient(45deg, #D4C4A8, #C4B398);
+    animation-delay: 0s;
+}
+
+.layer-2 {
+    bottom: 20px;
+    width: 65px;
+    height: 22px;
+    background: linear-gradient(45deg, #E8E0D0, #D4C4A8);
+    animation-delay: 0.5s;
+}
+
+.layer-3 {
+    bottom: 37px;
+    width: 50px;
+    height: 20px;
+    background: linear-gradient(45deg, #F5F2EA, #E8E0D0);
+    animation-delay: 1s;
+}
+
+.cake-topping {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    animation: sparkle 2s ease-in-out infinite;
+}
+
+/* Loading Text */
+.loading-text {
+    font-size: 1.1rem;
+    color: #8B7355;
+    margin-bottom: 1rem;
+    font-weight: 500;
+    animation: fadeText 2s ease-in-out infinite;
+}
+
+/* Progress Bar */
+.loading-progress {
+    width: 200px;
+    height: 4px;
+    background-color: #E8E0D0;
+    border-radius: 2px;
+    margin: 0 auto;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-bar {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #8B7355, #A0845C, #8B7355);
+    border-radius: 2px;
+    animation: progressFill 3s ease-out infinite;
+}
+
+/* Keyframe Animations */
+@keyframes bounceLoader {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes stackLayers {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+    }
+    50% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes sparkle {
+    0%, 100% {
+        transform: translateX(-50%) scale(1) rotate(0deg);
+    }
+    50% {
+        transform: translateX(-50%) scale(1.2) rotate(180deg);
+    }
+}
+
+@keyframes fadeText {
+    0%, 100% {
+        opacity: 0.7;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+@keyframes progressFill {
+    0% {
+        width: 0%;
+        opacity: 0.8;
+    }
+    70% {
+        width: 85%;
+        opacity: 1;
+    }
+    100% {
+        width: 100%;
+        opacity: 0.9;
+    }
 }
 
 /* Responsive Design */

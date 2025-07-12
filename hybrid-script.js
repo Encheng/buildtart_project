@@ -50,7 +50,22 @@ async function loadProducts() {
     const productsContainer = document.getElementById('productsContainer');
 
     try {
-        productsContainer.innerHTML = '<div class="loading">載入中...</div>';
+        productsContainer.innerHTML = `
+            <div class="loading-container">
+                <div class="loading-animation">
+                    <div class="cake-loader">
+                        <div class="cake-layer layer-1"></div>
+                        <div class="cake-layer layer-2"></div>
+                        <div class="cake-layer layer-3"></div>
+                        <div class="cake-topping">🍓</div>
+                    </div>
+                    <div class="loading-text">正在準備美味甜點...</div>
+                    <div class="loading-progress">
+                        <div class="progress-bar"></div>
+                    </div>
+                </div>
+            </div>
+        `;
 
         const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=getProducts&date=${selectedDate}`);
         const data = await response.json();
@@ -90,9 +105,16 @@ function displayProducts(products) {
         const stockText = getStockText(product.remaining, product.total);
         const isAvailable = product.remaining > 0;
 
+        const productImageHtml = product.imageUrl ?
+            `<img src="${escapeHtml(product.imageUrl)}" alt="${escapeHtml(product.name)}" class="product-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+             <div class="product-image-fallback" style="display:none;">🧁</div>` :
+            `<div class="product-image-fallback">🧁</div>`;
+
         html += `
             <div class="product-card" data-product-id="${product.id}">
-                <div class="product-image">🧁</div>
+                <div class="product-image">
+                    ${productImageHtml}
+                </div>
                 <div class="product-info">
                     <h3 class="product-name">${escapeHtml(product.name)}</h3>
                     <p class="product-description">${escapeHtml(product.description)}</p>
@@ -246,9 +268,10 @@ function handleOrderSubmit(e) {
     const formData = new FormData(e.target);
     const customerName = formData.get('customerName').trim();
     const customerPhone = formData.get('customerPhone').trim();
-    const customerEmail = formData.get('customerEmail').trim();
+    const customerInstagram = formData.get('customerInstagram').trim();
     const pickupDate = formData.get('pickupDate');
-    const pickupTime = formData.get('pickupTime');
+    const deliveryMethod = formData.get('deliveryMethod');
+    const customerAddress = formData.get('customerAddress').trim();
     const specialRequests = formData.get('specialRequests').trim();
 
     // 基本驗證
@@ -262,13 +285,23 @@ function handleOrderSubmit(e) {
         return;
     }
 
+    if (!customerInstagram) {
+        alert('請輸入IG帳號');
+        return;
+    }
+
     if (!pickupDate) {
         alert('請選擇取貨日期');
         return;
     }
 
-    if (!pickupTime) {
-        alert('請選擇取貨時間');
+    if (!deliveryMethod) {
+        alert('請選擇交易方式');
+        return;
+    }
+
+    if (!customerAddress) {
+        alert('請輸入配送地址');
         return;
     }
 
@@ -279,9 +312,10 @@ function handleOrderSubmit(e) {
     redirectToGoogleForm({
         customerName,
         customerPhone,
-        customerEmail,
+        customerInstagram,
         pickupDate,
-        pickupTime,
+        deliveryMethod,
+        customerAddress,
         specialRequests,
         orderSummary,
         totalAmount
@@ -304,14 +338,15 @@ function redirectToGoogleForm(orderData) {
     // 注意：這些參數名稱需要對應到您 Google Forms 中的實際欄位 ID
     const params = new URLSearchParams({
         // 基本資料 (請替換為您的實際欄位 ID)
-        'entry.1520392480': orderData.customerName,      // 姓名欄位
-        'entry.1520001722': orderData.customerPhone,     // 電話欄位
-        'entry.1546092137': orderData.customerEmail,     // Email欄位
-        'entry.1047149694': orderData.pickupDate,        // 取貨日期欄位
-        'entry.82924036': orderData.pickupTime,        // 取貨時間欄位
-        'entry.1969932251': orderData.orderSummary,      // 訂單內容欄位
-        'entry.247157095': orderData.totalAmount,       // 總金額欄位
-        'entry.65985849': orderData.specialRequests    // 特殊需求欄位
+        'entry.1520392480': orderData.customerName,         // 姓名欄位
+        'entry.1520001722': orderData.customerPhone,        // 電話欄位
+        'entry.1546092137': orderData.customerInstagram,    // IG帳號欄位
+        'entry.1047149694': orderData.pickupDate,           // 取貨日期欄位
+        'entry.1645634297': orderData.deliveryMethod,       // 交易方式欄位
+        'entry.82924036': orderData.customerAddress,      // 配送地址欄位
+        'entry.1969932251': orderData.orderSummary,         // 訂單內容欄位
+        'entry.247157095': orderData.totalAmount,          // 總金額欄位
+        'entry.65985849': orderData.specialRequests       // 特殊需求欄位
     });
 
     const formUrl = `${GOOGLE_FORM_URL}?${params.toString()}`;
@@ -406,5 +441,38 @@ function updateCurrentYear() {
     const yearElement = document.getElementById('currentYear');
     if (yearElement) {
         yearElement.textContent = currentYear;
+    }
+}
+
+// 更新交易方式選項
+function updateDeliveryOptions() {
+    const pickupDateInput = document.getElementById('pickupDate');
+    const deliveryMethodSelect = document.getElementById('deliveryMethod');
+
+    if (!pickupDateInput.value) {
+        deliveryMethodSelect.innerHTML = '<option value="">請先選擇取貨日期</option>';
+        return;
+    }
+
+    const selectedDate = new Date(pickupDateInput.value);
+    const dayOfWeek = selectedDate.getDay(); // 0=週日, 1=週一, ..., 6=週六
+
+    // 清空現有選項
+    deliveryMethodSelect.innerHTML = '';
+
+    // 週一～週五 (1-5)：顯示新竹選項
+    if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+        deliveryMethodSelect.innerHTML = `
+            <option value="">請選擇交易方式</option>
+            <option value="新竹-面交 (19:00)">新竹 - 面交 (19:00)</option>
+            <option value="新竹-外送 (20:00~22:00, 無法指定時間)">新竹 - 外送 (20:00~22:00, 無法指定時間)</option>
+        `;
+    }
+    // 週六、週日 (6, 0)：顯示台中選項
+    else if (dayOfWeek === 6 || dayOfWeek === 0) {
+        deliveryMethodSelect.innerHTML = `
+            <option value="">請選擇交易方式</option>
+            <option value="台中-外送 (14:00~16:00, 無法指定時間)">台中 - 外送 (14:00~16:00, 無法指定時間)</option>
+        `;
     }
 }

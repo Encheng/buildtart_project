@@ -73,28 +73,22 @@
                             <input type="tel" id="customerPhone" name="customerPhone" required>
                         </div>
                         <div class="form-group">
-                            <label for="customerEmail">Email</label>
-                            <input type="email" id="customerEmail" name="customerEmail">
+                            <label for="customerInstagram">IG帳號 *</label>
+                            <input type="text" id="customerInstagram" name="customerInstagram" placeholder="請輸入Instagram帳號 (不需要@)" required>
                         </div>
                         <div class="form-group">
                             <label for="pickupDate">取貨日期 *</label>
-                            <input type="date" id="pickupDate" name="pickupDate" required>
+                            <input type="date" id="pickupDate" name="pickupDate" required onchange="updateDeliveryOptions()">
                         </div>
                         <div class="form-group">
-                            <label for="pickupTime">取貨時間 *</label>
-                            <select id="pickupTime" name="pickupTime" required>
-                                <option value="">請選擇時間</option>
-                                <option value="09:00">09:00</option>
-                                <option value="10:00">10:00</option>
-                                <option value="11:00">11:00</option>
-                                <option value="12:00">12:00</option>
-                                <option value="13:00">13:00</option>
-                                <option value="14:00">14:00</option>
-                                <option value="15:00">15:00</option>
-                                <option value="16:00">16:00</option>
-                                <option value="17:00">17:00</option>
-                                <option value="18:00">18:00</option>
+                            <label for="deliveryMethod">交易方式 *</label>
+                            <select id="deliveryMethod" name="deliveryMethod" required>
+                                <option value="">請先選擇取貨日期</option>
                             </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="customerAddress">配送地址 *</label>
+                            <input type="text" id="customerAddress" name="customerAddress" placeholder="請輸入完整地址" required>
                         </div>
                         <div class="form-group">
                             <label>訂購項目</label>
