@@ -85,11 +85,11 @@ async function loadProducts() {
             throw new Error(data.message || '載入產品資料失敗');
         }
     } catch (error) {
-        console.error('載入產品時發生錯誤:', error);
+        console.error('載入商品時發生錯誤:', error);
         productsContainer.innerHTML = `
             <div class="error-message">
                 <h3>載入失敗</h3>
-                <p>暫時無法載入產品資料，請稍後再試。</p>
+                <p>暫時無法載入商品資料，請稍後再試。</p>
             </div>`;
     }
 }
@@ -101,7 +101,7 @@ function displayProducts(products) {
     if (products.length === 0) {
         productsContainer.innerHTML = `
             <div class="no-products-message">
-                <h3>今日暫無產品</h3>
+                <h3>今日暫無商品</h3>
                 <p>請選擇其他日期或稍後再來看看</p>
             </div>`;
         return;
@@ -196,7 +196,7 @@ function updateOrderDisplay() {
     const orderItemsContainer = document.getElementById('orderItems');
 
     if (orderItems.length === 0) {
-        orderItemsContainer.innerHTML = '<p class="text-center">尚未選擇任何產品</p>';
+        orderItemsContainer.innerHTML = '<p class="text-center">尚未選擇任何商品</p>';
         return;
     }
 
