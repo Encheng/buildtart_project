@@ -301,6 +301,65 @@ h1, h2, h3, h4, h5, h6, p, div, span, a, button, input, select, textarea, label 
     cursor: not-allowed;
 }
 
+/* 尺寸選擇器樣式 */
+.size-selector {
+    margin: 1rem 0;
+}
+
+.size-selector label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #8B7355;
+    font-size: 0.9rem;
+}
+
+.size-selector select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid #D4C4A8;
+    border-radius: 5px;
+    background-color: white;
+    color: #5D4E37;
+    font-size: 0.9rem;
+    transition: border-color 0.3s ease;
+}
+
+.size-selector select:focus {
+    outline: none;
+    border-color: #8B7355;
+}
+
+.size-selector select:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+}
+
+/* 產品類型資訊顯示 */
+.product-type-info {
+    margin: 1rem 0;
+    padding: 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.type-label {
+    font-weight: bold;
+    color: #8B7355;
+    font-size: 0.9rem;
+}
+
+.type-value {
+    color: #5D4E37;
+    font-size: 0.9rem;
+    background-color: #F5F2EA;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    border: 1px solid #D4C4A8;
+    display: inline-block;
+}
+
 /* 購物流程 Section */
 .how-to-order-section {
     padding: 80px 0;

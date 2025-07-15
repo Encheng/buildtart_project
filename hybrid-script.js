@@ -1,5 +1,5 @@
 // Google Apps Script Web App URL (只處理產品查詢)
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbydEGL73QnGDtgpzLrTtGsLEoNBj1g2jfIs_duiE4hON3iHD2xtoD2NTMa--rvDrqNh/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxKkyJZYn2d1nnP01LC5xDrxPNsazUz8FNRLi4LuYV7LOWT8NH34xLx4zhhbVyCPw8J/exec';
 
 // Google Forms URL (處理訂單提交)
 const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSfNHI38AKIzed7cHfOdc5HHHi57fCKWv7jy-j_5kGRJpGehUQ/viewform';
@@ -107,37 +107,122 @@ function displayProducts(products) {
         return;
     }
 
+    // 將產品按照產品名稱進行 grouping
+    const groupedProducts = groupProductsByName(products);
+    
     let html = '';
-    products.forEach(product => {
-        const stockClass = getStockClass(product.remaining, product.total);
-        const stockText = getStockText(product.remaining, product.total);
-        const isAvailable = product.remaining > 0;
-
-        const productImageHtml = product.imageUrl ?
-            `<img src="${escapeHtml(product.imageUrl)}" alt="${escapeHtml(product.name)}" class="product-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+    groupedProducts.forEach(group => {
+        const productImageHtml = group.imageUrl ?
+            `<img src="${escapeHtml(group.imageUrl)}" alt="${escapeHtml(group.name)}" class="product-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
              <div class="product-image-fallback" style="display:none;">🧁</div>` :
             `<div class="product-image-fallback">🧁</div>`;
 
+        let priceDisplay = '';
+        let typeSelector = '';
+        let addToOrderButton = '';
+        let stockDisplay = '';
+
+        if (group.variants.length > 1) {
+            // 多個類型：顯示類型選擇器
+            const groupId = `group_${group.name.replace(/\s+/g, '_')}`;
+            priceDisplay = `<p class="product-price" id="price-${groupId}">請選擇類型</p>`;
+            
+            typeSelector = `
+                <div class="size-selector">
+                    <label for="type-${groupId}">類型選擇：</label>
+                    <select id="type-${groupId}" onchange="updateProductPrice('${groupId}')">
+                        <option value="">請選擇類型</option>
+                        ${group.variants.map(variant => 
+                            `<option value="${variant.id}" data-price="${variant.price}" data-remaining="${variant.remaining}" data-total="${variant.total}">
+                                ${variant.type} - NT$ ${variant.price}
+                            </option>`
+                        ).join('')}
+                    </select>
+                </div>`;
+            
+            stockDisplay = `<p class="product-stock" id="stock-${groupId}">請先選擇類型</p>`;
+            
+            addToOrderButton = `
+                <button class="add-to-order-btn" id="btn-${groupId}"
+                        onclick="addVariantToOrder('${groupId}')" disabled>
+                    請先選擇類型
+                </button>`;
+        } else {
+            // 單一類型：直接顯示
+            const variant = group.variants[0];
+            const stockClass = getStockClass(variant.remaining, variant.total);
+            const stockText = getStockText(variant.remaining, variant.total);
+            const isAvailable = variant.remaining > 0;
+            
+            priceDisplay = `<p class="product-price">NT$ ${variant.price}</p>`;
+            
+            // 顯示類型資訊
+            typeSelector = `
+                <div class="product-type-info">
+                    <span class="type-label">類型：</span>
+                    <span class="type-value">${variant.type}</span>
+                </div>`;
+            
+            stockDisplay = `<p class="product-stock ${stockClass}">${stockText}</p>`;
+            
+            addToOrderButton = `
+                <button class="add-to-order-btn"
+                        onclick="addToOrder('${variant.id}')"
+                        ${!isAvailable ? 'disabled' : ''}>
+                    ${isAvailable ? '加入訂單' : '已售完'}
+                </button>`;
+        }
+
         html += `
-            <div class="product-card" data-product-id="${product.id}">
+            <div class="product-card" data-product-name="${escapeHtml(group.name)}">
                 <div class="product-image">
                     ${productImageHtml}
                 </div>
                 <div class="product-info">
-                    <h3 class="product-name">${escapeHtml(product.name)}</h3>
-                    <p class="product-description">${escapeHtml(product.description)}</p>
-                    <p class="product-price">NT$ ${product.price}</p>
-                    <p class="product-stock ${stockClass}">${stockText}</p>
-                    <button class="add-to-order-btn"
-                            onclick="addToOrder('${product.id}')"
-                            ${!isAvailable ? 'disabled' : ''}>
-                        ${isAvailable ? '加入訂單' : '已售完'}
-                    </button>
+                    <h3 class="product-name">${escapeHtml(group.name)}</h3>
+                    <p class="product-description">${escapeHtml(group.description)}</p>
+                    ${priceDisplay}
+                    ${stockDisplay}
+                    ${typeSelector}
+                    ${addToOrderButton}
                 </div>
             </div>`;
     });
 
     productsContainer.innerHTML = html;
+}
+
+// 將產品按照產品名稱進行 grouping
+function groupProductsByName(products) {
+    const groups = {};
+    
+    products.forEach(product => {
+        if (!groups[product.name]) {
+            groups[product.name] = {
+                name: product.name,
+                description: product.description,
+                imageUrl: product.imageUrl,
+                variants: []
+            };
+        }
+        
+        groups[product.name].variants.push({
+            id: product.id,
+            type: product.type,
+            price: product.price,
+            total: product.total,
+            remaining: product.remaining
+        });
+    });
+    
+    // 將物件轉換為陣列並按類型排序
+    return Object.values(groups).map(group => {
+        group.variants.sort((a, b) => {
+            const typeOrder = { '小塔': 1, '大塔': 2, '其他': 3 };
+            return (typeOrder[a.type] || 99) - (typeOrder[b.type] || 99);
+        });
+        return group;
+    });
 }
 
 // HTML 跳脫防止 XSS
@@ -158,6 +243,93 @@ function getStockText(remaining, total) {
     if (remaining === 0) return '已售完';
     if (remaining <= total * 0.3) return `剩餘 ${remaining} 個 (庫存不足)`;
     return `剩餘 ${remaining} 個`;
+}
+
+// 更新產品價格和庫存顯示
+function updateProductPrice(groupId) {
+    const typeSelect = document.getElementById(`type-${groupId}`);
+    const priceDisplay = document.getElementById(`price-${groupId}`);
+    const stockDisplay = document.getElementById(`stock-${groupId}`);
+    const addButton = document.getElementById(`btn-${groupId}`);
+    
+    if (typeSelect.value) {
+        const selectedOption = typeSelect.options[typeSelect.selectedIndex];
+        const price = selectedOption.getAttribute('data-price');
+        const remaining = parseInt(selectedOption.getAttribute('data-remaining'));
+        const total = parseInt(selectedOption.getAttribute('data-total'));
+        
+        priceDisplay.textContent = `NT$ ${price}`;
+        
+        // 更新庫存顯示
+        const stockClass = getStockClass(remaining, total);
+        const stockText = getStockText(remaining, total);
+        stockDisplay.textContent = stockText;
+        stockDisplay.className = `product-stock ${stockClass}`;
+        
+        // 更新按鈕狀態
+        if (remaining > 0) {
+            addButton.textContent = '加入訂單';
+            addButton.disabled = false;
+        } else {
+            addButton.textContent = '已售完';
+            addButton.disabled = true;
+        }
+    } else {
+        priceDisplay.textContent = '請選擇類型';
+        stockDisplay.textContent = '請先選擇類型';
+        stockDisplay.className = 'product-stock';
+        addButton.textContent = '請先選擇類型';
+        addButton.disabled = true;
+    }
+}
+
+// 變體產品加入訂單
+function addVariantToOrder(groupId) {
+    const typeSelect = document.getElementById(`type-${groupId}`);
+    if (!typeSelect.value) {
+        alert('請先選擇類型');
+        return;
+    }
+
+    const selectedOption = typeSelect.options[typeSelect.selectedIndex];
+    const productId = selectedOption.value;
+    const price = parseInt(selectedOption.getAttribute('data-price'));
+    const remaining = parseInt(selectedOption.getAttribute('data-remaining'));
+    
+    // 找到對應的產品資料
+    const product = products.find(p => p.id === productId);
+    if (!product) {
+        alert('找不到此產品');
+        return;
+    }
+
+    if (remaining === 0) {
+        alert('此產品已售完');
+        return;
+    }
+
+    const existingItem = orderItems.find(item => item.productId === productId);
+
+    if (existingItem) {
+        if (existingItem.quantity < Math.min(remaining, 10)) {
+            existingItem.quantity += 1;
+        } else {
+            alert('數量已達上限');
+            return;
+        }
+    } else {
+        orderItems.push({
+            productId: productId,
+            name: `${product.name} (${product.type})`,
+            price: price,
+            quantity: 1,
+            maxQuantity: Math.min(remaining, 10)
+        });
+    }
+
+    updateOrderDisplay();
+    updateTotalAmount();
+    document.getElementById('order').scrollIntoView({ behavior: 'smooth' });
 }
 
 // 訂單相關函數
