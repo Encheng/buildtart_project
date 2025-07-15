@@ -1,10 +1,11 @@
-# 🎯 BuildTart 設定說明
+# 🎯 BuildTart 築塔 STUDIO 設定說明
 
 ## 📋 方案概述
 
 **混合架構**：
 - **Google Apps Script** ➜ 只負責產品查詢 (低風險)
 - **Google Forms** ➜ 處理訂單提交 (官方安全防護)
+- **自動庫存管理** ➜ 表單提交觸發器自動更新庫存
 
 ### 🔒 安全優勢
 - ✅ **官方防護** - Google Forms 內建 spam 防護
@@ -12,16 +13,24 @@
 - ✅ **資料驗證** - 必填欄位、格式檢查
 - ✅ **提交限制** - 防止大量攻擊
 - ✅ **免費穩定** - Google 官方維護
+- ✅ **自動庫存** - 表單提交後自動扣減庫存
 
 ## 🛠️ 設定步驟
 
 ### 步驟 1: 更新 Google Apps Script
 
-1. **使用gs程式碼**
-   - 將 `hybrid-apps-script.gs` 內容複製到您的 Google Apps Script
+1. **使用完整程式碼**
+   - 將 `google-apps-script.gs` 內容複製到您的 Google Apps Script
    - 更新 `SHEET_ID` 為您的實際 Google Sheets ID
 
-2. **重新部署 Web App**
+2. **設定自動庫存管理**
+   - 執行 `setupFormSubmitTrigger()` 函數設定表單提交觸發器
+   - 或手動在 Apps Script 編輯器中設定觸發器：
+     - 函數：`onFormSubmit`
+     - 事件來源：來自試算表
+     - 事件類型：表單提交時
+
+3. **重新部署 Web App**
    - 建立新的部署版本
    - 複製新的 Web App URL
 
@@ -49,34 +58,43 @@
 - **問題**: 聯絡電話 *
 - **設定**: 必填、正規表達式驗證 `[\d\-\+\(\)\s]{8,15}`
 
-#### 欄位 3: Email 信箱
+#### 欄位 3: IG 帳號
 - **類型**: 簡答
-- **問題**: Email 信箱
-- **設定**: Email 格式驗證
+- **問題**: IG 帳號 *
+- **設定**: 必填、字數限制 1-50 字
 
 #### 欄位 4: 取貨日期
 - **類型**: 日期
 - **問題**: 取貨日期 *
 - **設定**: 必填
 
-#### 欄位 5: 取貨時間
+#### 欄位 5: 交易方式
 - **類型**: 單選
-- **問題**: 取貨時間 *
-- **選項**: 09:00, 10:00, 11:00, 12:00, 13:00, 14:00, 15:00, 16:00, 17:00, 18:00
+- **問題**: 交易方式 *
+- **選項**: 
+  - 新竹-面交 (19:00)
+  - 新竹-外送 (20:00~22:00, 無法指定時間)
+  - 台中-外送 (14:00~16:00, 無法指定時間)
 - **設定**: 必填
 
-#### 欄位 6: 訂單內容
+#### 欄位 6: 配送地址
+- **類型**: 段落
+- **問題**: 配送地址 *
+- **說明**: 縣市 + 鄉鎮市區 + 詳細地址
+- **設定**: 必填
+
+#### 欄位 7: 訂單內容
 - **類型**: 段落
 - **問題**: 訂單內容 *
-- **說明**: 此欄位會自動填入您選購的產品資訊
+- **說明**: 此欄位會自動填入您選購的產品資訊，包含訂購日期
 - **設定**: 必填
 
-#### 欄位 7: 總金額
+#### 欄位 8: 總金額
 - **類型**: 簡答
 - **問題**: 總金額 (NT$) *
 - **設定**: 必填、數字驗證
 
-#### 欄位 8: 特殊需求
+#### 欄位 9: 特殊需求
 - **類型**: 段落
 - **問題**: 特殊需求或備註
 - **設定**: 字數限制 500 字
@@ -119,14 +137,15 @@
    // https://docs.google.com/forms/d/e/1FAIpQLSe.../viewform?entry.123456789=測試姓名&entry.987654321=0912345678...
 
    const FORM_FIELD_IDS = {
-       customerName: 'entry.123456789',    // 客戶姓名
-       customerPhone: 'entry.987654321',   // 聯絡電話
-       customerEmail: 'entry.555666777',   // Email 信箱
-       pickupDate: 'entry.111222333',      // 取貨日期
-       pickupTime: 'entry.444555666',      // 取貨時間
-       orderSummary: 'entry.888999000',    // 訂單內容
-       totalAmount: 'entry.222333444',     // 總金額
-       specialRequests: 'entry.666777888'  // 特殊需求
+       customerName: 'entry.123456789',        // 客戶姓名
+       customerPhone: 'entry.987654321',       // 聯絡電話
+       customerInstagram: 'entry.555666777',   // IG 帳號
+       pickupDate: 'entry.111222333',          // 取貨日期
+       deliveryMethod: 'entry.444555666',      // 交易方式
+       customerAddress: 'entry.777888999',     // 配送地址
+       orderSummary: 'entry.888999000',        // 訂單內容
+       totalAmount: 'entry.222333444',         // 總金額
+       specialRequests: 'entry.666777888'      // 特殊需求
    };
    ```
 
@@ -145,10 +164,23 @@
 
    // 在 redirectToGoogleForm 函數中更新欄位 ID
    const params = new URLSearchParams({
-       'entry.123456789': orderData.customerName,      // 替換為實際 ID
-       'entry.987654321': orderData.customerPhone,     // 替換為實際 ID
-       // ... 其他欄位
+       'entry.123456789': orderData.customerName,          // 客戶姓名
+       'entry.987654321': orderData.customerPhone,         // 聯絡電話
+       'entry.555666777': orderData.customerInstagram,     // IG 帳號
+       'entry.111222333': orderData.pickupDate,            // 取貨日期
+       'entry.444555666': orderData.deliveryMethod,        // 交易方式
+       'entry.777888999': orderData.customerAddress,       // 配送地址
+       'entry.888999000': orderData.orderSummary,          // 訂單內容
+       'entry.222333444': orderData.totalAmount,           // 總金額
+       'entry.666777888': orderData.specialRequests        // 特殊需求
    });
+   ```
+
+2. **添加網站圖標**
+   - 將 `favicon.ico` 和 `threads.png` 放置在網站根目錄
+   - 確保 HTML 中已包含 favicon 引用：
+   ```html
+   <link rel="icon" type="image/x-icon" href="favicon.ico">
    ```
 
 ### 步驟 6: 設定 Google Sheets 接收訂單
@@ -207,10 +239,35 @@
 **A**: 可以在 Google Forms 設定中啟用「限制為 1 次回應」，但建議不要啟用以免影響正常客戶。
 
 ### Q: 可以自動扣除庫存嗎？
-**A**: 目前方案不會自動扣庫存，需要手動管理。如需自動扣庫存，建議升級到完整的後端解決方案。
+**A**: 是的！系統會在顧客提交 Google Forms 後自動扣除庫存。確保已設定表單提交觸發器。
 
 ### Q: 訂單資料的安全性如何？
 **A**: Google Forms 的安全性由 Google 負責，符合國際安全標準，比自製系統更安全。
+
+## 🎨 網站功能
+
+### 視覺設計
+- 🎯 **品牌識別** - Logo 和品牌色彩設計
+- 📱 **響應式設計** - 支援手機和桌機瀏覽
+- 🌟 **載入動畫** - 精美的蛋糕製作動畫
+- 🗺️ **地址選擇** - 台灣縣市鄉鎮區選擇器
+
+### 社群媒體
+- 📸 **Instagram** - 連結到 @buildtart.studio
+- 🧵 **Threads** - 連結到 @buildtart.studio
+- 🔗 **Footer 位置** - 簡約白色線條圖標
+
+### 交易功能
+- 📅 **智慧交易選項** - 根據選擇日期自動切換：
+  - 週一～週五：新竹面交、外送
+  - 週六～週日：台中外送
+- 🕒 **時區修正** - 正確顯示今日日期
+- 💫 **載入狀態** - 美觀的產品載入動畫
+
+### 庫存管理
+- 📊 **即時庫存** - 顯示剩餘數量和庫存狀態
+- 🔄 **自動扣庫存** - 表單提交後自動更新
+- 📈 **庫存警示** - 庫存不足時顯示警告
 
 ## 📞 技術支援
 
@@ -220,5 +277,20 @@
 2. **測試連結**：確認所有 URL 都正確無誤
 3. **權限設定**：確認 Google Apps Script 和 Google Forms 的權限正確
 4. **瀏覽器測試**：嘗試不同瀏覽器測試
+5. **觸發器檢查**：確認表單提交觸發器已正確設定
 
 **最後提醒**：記得定期備份您的 Google Sheets 資料，並且妥善保管各種 URL 和設定資訊。
+
+## 📁 檔案結構
+
+```
+buildtart.com.tw/
+├── index.html              # 主要網頁
+├── styles.css              # 樣式表
+├── hybrid-script.js        # 前端 JavaScript
+├── google-apps-script.gs   # 後端 Google Apps Script
+├── favicon.ico            # 網站圖標
+├── threads.png            # Threads 社群媒體圖標
+├── logo.jpg               # 品牌 Logo
+└── README.md              # 設定說明文件
+```
