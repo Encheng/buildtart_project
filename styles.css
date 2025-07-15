@@ -192,6 +192,26 @@ body {
     width: 100%;
 }
 
+/* 無產品訊息置中 */
+.products-grid .no-products-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #8B7355;
+}
+
+.no-products-message h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #8B7355;
+}
+
+.no-products-message p {
+    font-size: 1.1rem;
+    color: #5D4E37;
+    opacity: 0.8;
+}
+
 .product-card {
     background: white;
     border-radius: 15px;
@@ -478,6 +498,22 @@ body {
     border-radius: 5px;
     font-size: 1rem;
     transition: border-color 0.3s ease;
+}
+
+/* Address Selectors */
+.address-selectors {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.detail-address {
+    margin-top: 10px;
+}
+
+.address-selectors select {
+    width: 100%;
 }
 
 .form-group input:focus,
@@ -876,6 +912,12 @@ footer {
 
     .flow-step p {
         font-size: 0.8rem;
+    }
+    
+    /* 地址選擇器響應式 */
+    .address-selectors {
+        grid-template-columns: 1fr;
+        gap: 10px;
     }
 }
 

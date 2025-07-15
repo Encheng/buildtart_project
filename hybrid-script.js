@@ -8,17 +8,25 @@ const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSfNHI38AKIzed7
 let products = [];
 let orderItems = [];
 let totalAmount = 0;
+let taiwanAddressData = null;
 
 // DOM 載入完成後初始化
 document.addEventListener('DOMContentLoaded', function() {
     initializePage();
     updateCurrentYear();
+    loadTaiwanAddressData();
 });
 
 // 初始化頁面
 function initializePage() {
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('dateSelect').value = today;
+    // 修正時區問題，使用本地時間
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const todayString = `${year}-${month}-${day}`;
+
+    document.getElementById('dateSelect').value = todayString;
 
     loadProducts();
     setupScrolling();
@@ -92,7 +100,7 @@ function displayProducts(products) {
 
     if (products.length === 0) {
         productsContainer.innerHTML = `
-            <div class="text-center">
+            <div class="no-products-message">
                 <h3>今日暫無產品</h3>
                 <p>請選擇其他日期或稍後再來看看</p>
             </div>`;
@@ -271,7 +279,10 @@ function handleOrderSubmit(e) {
     const customerInstagram = formData.get('customerInstagram').trim();
     const pickupDate = formData.get('pickupDate');
     const deliveryMethod = formData.get('deliveryMethod');
-    const customerAddress = formData.get('customerAddress').trim();
+    const city = formData.get('city');
+    const district = formData.get('district');
+    const detailAddress = formData.get('detailAddress').trim();
+    const customerAddress = `${city}${district}${detailAddress}`;
     const specialRequests = formData.get('specialRequests').trim();
 
     // 基本驗證
@@ -300,8 +311,18 @@ function handleOrderSubmit(e) {
         return;
     }
 
-    if (!customerAddress) {
-        alert('請輸入配送地址');
+    if (!city) {
+        alert('請選擇縣市');
+        return;
+    }
+
+    if (!district) {
+        alert('請選擇鄉鎮市區');
+        return;
+    }
+
+    if (!detailAddress) {
+        alert('請輸入詳細地址');
         return;
     }
 
@@ -324,11 +345,21 @@ function handleOrderSubmit(e) {
 
 // 生成訂單摘要
 function generateOrderSummary() {
-    let summary = '訂單內容：\n';
+    const selectedDate = document.getElementById('dateSelect').value;
+    let summary = `訂購日期：${selectedDate}\n訂單內容：\n`;
+
     orderItems.forEach(item => {
-        summary += `• ${item.name} x ${item.quantity} = NT$ ${item.price * item.quantity}\n`;
+        // 包含產品ID和日期資訊，方便Excel公式解析
+        summary += `• ${item.name} (${item.productId}) x ${item.quantity} = NT$ ${item.price * item.quantity}\n`;
     });
     summary += `\n總金額：NT$ ${totalAmount}`;
+
+    // 為了方便Excel解析，額外添加結構化資料
+    summary += '\n---產品明細---\n';
+    orderItems.forEach(item => {
+        summary += `${item.productId}:${item.quantity}:${selectedDate}\n`;
+    });
+
     return summary;
 }
 
@@ -475,4 +506,123 @@ function updateDeliveryOptions() {
             <option value="台中-外送 (14:00~16:00, 無法指定時間)">台中 - 外送 (14:00~16:00, 無法指定時間)</option>
         `;
     }
+}
+
+// 載入台灣地址資料
+async function loadTaiwanAddressData() {
+    try {
+        const response = await fetch('https://raw.githubusercontent.com/donma/TaiwanAddressCityAreaRoadChineseEnglishJSON/master/CityCountyData.json');
+        taiwanAddressData = await response.json();
+        populateCityOptions();
+    } catch (error) {
+        console.error('載入地址資料失敗:', error);
+        // 使用備用的簡化資料
+        taiwanAddressData = getBackupAddressData();
+        populateCityOptions();
+    }
+}
+
+// 填充縣市選項
+function populateCityOptions() {
+    const citySelect = document.getElementById('citySelect');
+    if (!citySelect || !taiwanAddressData) return;
+
+    citySelect.innerHTML = '<option value="">請選擇縣市</option>';
+
+    taiwanAddressData.forEach(city => {
+        const option = document.createElement('option');
+        option.value = city.CityName;
+        option.textContent = city.CityName;
+        citySelect.appendChild(option);
+    });
+}
+
+// 更新區域選項
+function updateDistricts() {
+    const citySelect = document.getElementById('citySelect');
+    const districtSelect = document.getElementById('districtSelect');
+
+    if (!citySelect || !districtSelect) return;
+
+    const selectedCity = citySelect.value;
+
+    if (!selectedCity) {
+        districtSelect.innerHTML = '<option value="">請先選擇縣市</option>';
+        districtSelect.disabled = true;
+        return;
+    }
+
+    const cityData = taiwanAddressData.find(city => city.CityName === selectedCity);
+
+    if (!cityData) {
+        districtSelect.innerHTML = '<option value="">無可用區域</option>';
+        districtSelect.disabled = true;
+        return;
+    }
+
+    districtSelect.innerHTML = '<option value="">請選擇鄉鎮市區</option>';
+    districtSelect.disabled = false;
+
+    cityData.AreaList.forEach(area => {
+        const option = document.createElement('option');
+        option.value = area.AreaName;
+        option.textContent = area.AreaName;
+        districtSelect.appendChild(option);
+    });
+}
+
+// 備用地址資料（簡化版）
+function getBackupAddressData() {
+    return [
+        {
+            "CityName": "台北市",
+            "AreaList": [
+                {"AreaName": "中正區"}, {"AreaName": "大同區"}, {"AreaName": "中山區"},
+                {"AreaName": "松山區"}, {"AreaName": "大安區"}, {"AreaName": "萬華區"},
+                {"AreaName": "信義區"}, {"AreaName": "士林區"}, {"AreaName": "北投區"},
+                {"AreaName": "內湖區"}, {"AreaName": "南港區"}, {"AreaName": "文山區"}
+            ]
+        },
+        {
+            "CityName": "新北市",
+            "AreaList": [
+                {"AreaName": "板橋區"}, {"AreaName": "三重區"}, {"AreaName": "中和區"},
+                {"AreaName": "永和區"}, {"AreaName": "新莊區"}, {"AreaName": "新店區"},
+                {"AreaName": "樹林區"}, {"AreaName": "鶯歌區"}, {"AreaName": "三峽區"},
+                {"AreaName": "淡水區"}, {"AreaName": "汐止區"}, {"AreaName": "瑞芳區"}
+            ]
+        },
+        {
+            "CityName": "桃園市",
+            "AreaList": [
+                {"AreaName": "桃園區"}, {"AreaName": "中壢區"}, {"AreaName": "大溪區"},
+                {"AreaName": "楊梅區"}, {"AreaName": "蘆竹區"}, {"AreaName": "大園區"},
+                {"AreaName": "龜山區"}, {"AreaName": "八德區"}, {"AreaName": "龍潭區"},
+                {"AreaName": "平鎮區"}, {"AreaName": "新屋區"}, {"AreaName": "觀音區"}
+            ]
+        },
+        {
+            "CityName": "台中市",
+            "AreaList": [
+                {"AreaName": "中區"}, {"AreaName": "東區"}, {"AreaName": "南區"},
+                {"AreaName": "西區"}, {"AreaName": "北區"}, {"AreaName": "北屯區"},
+                {"AreaName": "西屯區"}, {"AreaName": "南屯區"}, {"AreaName": "太平區"},
+                {"AreaName": "大里區"}, {"AreaName": "霧峰區"}, {"AreaName": "烏日區"}
+            ]
+        },
+        {
+            "CityName": "新竹市",
+            "AreaList": [
+                {"AreaName": "東區"}, {"AreaName": "北區"}, {"AreaName": "香山區"}
+            ]
+        },
+        {
+            "CityName": "新竹縣",
+            "AreaList": [
+                {"AreaName": "竹北市"}, {"AreaName": "竹東鎮"}, {"AreaName": "新埔鎮"},
+                {"AreaName": "關西鎮"}, {"AreaName": "湖口鄉"}, {"AreaName": "新豐鄉"},
+                {"AreaName": "芎林鄉"}, {"AreaName": "橫山鄉"}, {"AreaName": "北埔鄉"}
+            ]
+        }
+    ];
 }
