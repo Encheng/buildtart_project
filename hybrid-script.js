@@ -67,17 +67,58 @@ function setupScrolling() {
     });
 }
 
-// 設定手機版下拉選單
+// 設定手機版漢堡選單和下拉選單
 function setupMobileDropdown() {
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const navMenuWrapper = document.getElementById('navMenuWrapper');
     const dropdownToggle = document.querySelector('.dropdown-toggle');
     const navDropdown = document.querySelector('.nav-dropdown');
     const dropdownMenu = document.querySelector('.dropdown-menu');
     
+    // 漢堡選單點擊事件
+    if (hamburgerBtn && navMenuWrapper) {
+        hamburgerBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            hamburgerBtn.classList.toggle('active');
+            navMenuWrapper.classList.toggle('active');
+            
+            // 防止背景滾動
+            if (navMenuWrapper.classList.contains('active')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        });
+        
+        // 點擊選單項目後關閉漢堡選單
+        const navLinks = navMenuWrapper.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                // 如果不是下拉選單的切換按鈕，則關閉漢堡選單
+                if (!link.classList.contains('dropdown-toggle')) {
+                    hamburgerBtn.classList.remove('active');
+                    navMenuWrapper.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+        
+        // 點擊背景關閉漢堡選單
+        navMenuWrapper.addEventListener('click', function(e) {
+            if (e.target === navMenuWrapper) {
+                hamburgerBtn.classList.remove('active');
+                navMenuWrapper.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+    }
+    
+    // 下拉選單功能
     if (dropdownToggle && navDropdown && dropdownMenu) {
         dropdownToggle.addEventListener('click', function(e) {
             e.preventDefault();
             
-            // 檢查是否在手機版本（768px 以下）
+            // 在手機版本中處理下拉選單
             if (window.innerWidth <= 768) {
                 navDropdown.classList.toggle('active');
                 dropdownMenu.classList.toggle('show');
@@ -88,8 +129,11 @@ function setupMobileDropdown() {
         window.addEventListener('resize', function() {
             if (window.innerWidth > 768) {
                 // 桌面版本：移除手機版的類別
+                hamburgerBtn.classList.remove('active');
+                navMenuWrapper.classList.remove('active');
                 navDropdown.classList.remove('active');
                 dropdownMenu.classList.remove('show');
+                document.body.style.overflow = '';
             }
         });
         
@@ -98,6 +142,10 @@ function setupMobileDropdown() {
             if (e.target.classList.contains('dropdown-item') && window.innerWidth <= 768) {
                 navDropdown.classList.remove('active');
                 dropdownMenu.classList.remove('show');
+                // 選擇日期後也關閉整個漢堡選單
+                hamburgerBtn.classList.remove('active');
+                navMenuWrapper.classList.remove('active');
+                document.body.style.overflow = '';
             }
         });
     }
