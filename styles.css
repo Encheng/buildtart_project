@@ -1136,7 +1136,7 @@ footer {
         border: 1px solid rgba(255, 255, 255, 0.2);
         border-radius: 8px;
         margin-top: 1rem;
-        padding: 0.5rem 0;
+        padding: 0;
         opacity: 0;
         visibility: hidden;
         max-height: 0;
@@ -1149,6 +1149,7 @@ footer {
         opacity: 1;
         visibility: visible;
         max-height: 400px;
+        padding: 0.5rem 0;
         transform: translateY(0);
     }
     
