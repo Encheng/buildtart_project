@@ -86,6 +86,86 @@ h1, h2, h3, h4, h5, h6, p, div, span, a, button, input, select, textarea, label 
     color: #D4C4A8;
 }
 
+/* 導航欄下拉選單 */
+.nav-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-toggle {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dropdown-toggle:hover {
+    color: #D4C4A8;
+}
+
+.dropdown-toggle::after {
+    content: '▼';
+    font-size: 0.7rem;
+    transition: transform 0.3s ease;
+}
+
+.nav-dropdown:hover .dropdown-toggle::after {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #8B7355;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    min-width: 200px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    list-style: none;
+    padding: 0.5rem 0;
+    margin: 0;
+    margin-top: 0.5rem;
+}
+
+.nav-dropdown:hover .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-item.loading {
+    color: #D4C4A8;
+    cursor: default;
+}
+
+.dropdown-item.loading:hover {
+    background-color: transparent;
+}
 
 /* Hero Section */
 .hero {
@@ -923,6 +1003,25 @@ footer {
         gap: 1rem;
         align-items: center;
         justify-content: center;
+    }
+
+    /* 響應式導航欄下拉選單 */
+    .dropdown-menu {
+        position: relative;
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        margin-top: 0.5rem;
+        min-width: 150px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .dropdown-toggle::after {
+        display: none;
+    }
+
+    .nav-dropdown:hover .dropdown-menu {
+        display: block;
     }
 
     .social-link {

@@ -29,6 +29,7 @@ function initializePage() {
     document.getElementById('dateSelect').value = todayString;
 
     loadProducts();
+    loadAvailableDates();
     setupScrolling();
 
     // 移除原本的表單提交事件，改用新的訂單處理
@@ -94,6 +95,121 @@ async function loadProducts() {
     }
 }
 
+// 載入可用日期
+async function loadAvailableDates() {
+    try {
+        console.log('開始載入可用日期...');
+        const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=getAvailableDates`);
+        const data = await response.json();
+        console.log('載入可用日期回應:', data);
+
+        if (data.success) {
+            // 根據 createResponse 函數的邏輯，陣列會被設定為 products 屬性
+            const dates = data.products || data.data || [];
+            console.log('找到的日期:', dates);
+            console.log('data.products:', data.products);
+            console.log('data.data:', data.data);
+            populateNavDateSelect(dates);
+        } else {
+            console.error('載入可用日期失敗:', data.message);
+        }
+    } catch (error) {
+        console.error('載入可用日期時發生錯誤:', error);
+    }
+}
+
+// 填充導航欄日期選擇器
+function populateNavDateSelect(dates) {
+    console.log('populateNavDateSelect 被調用，日期數量:', dates.length);
+    console.log('日期內容:', dates);
+
+    const navDateMenu = document.getElementById('navDateMenu');
+    console.log('navDateMenu 元素:', navDateMenu);
+
+    if (!navDateMenu) {
+        console.error('找不到 navDateMenu 元素');
+        return;
+    }
+
+    // 清空現有選項
+    navDateMenu.innerHTML = '';
+
+    if (dates.length === 0) {
+        console.log('沒有日期資料，顯示暫無可用日期');
+        const noDateItem = document.createElement('li');
+        noDateItem.className = 'dropdown-item loading';
+        noDateItem.textContent = '暫無可用日期';
+        navDateMenu.appendChild(noDateItem);
+        return;
+    }
+
+    // 添加日期選項
+    const currentDate = document.getElementById('dateSelect').value;
+    console.log('當前選中的日期:', currentDate);
+
+    dates.forEach((date, index) => {
+        console.log(`處理日期 ${index + 1}:`, date);
+        const dateItem = document.createElement('li');
+        dateItem.className = 'dropdown-item';
+        dateItem.textContent = formatDisplayDate(date);
+        dateItem.setAttribute('data-date', date);
+        dateItem.addEventListener('click', function(e) {
+            e.preventDefault();
+            onNavDateSelect(date);
+        });
+
+        // 高亮當前選中的日期
+        if (date === currentDate) {
+            dateItem.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+        }
+
+        navDateMenu.appendChild(dateItem);
+        console.log(`已添加日期項目:`, dateItem);
+    });
+
+    console.log('所有日期項目已添加完成，總共:', dates.length, '個');
+}
+
+// 處理導航欄日期選擇
+function onNavDateSelect(selectedDate) {
+    if (selectedDate) {
+        // 同步更新產品區域的日期選擇器
+        document.getElementById('dateSelect').value = selectedDate;
+
+        // 載入對應日期的產品
+        loadProducts();
+
+        // 滾動到產品區域
+        document.getElementById('products').scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+// 處理產品區域日期選擇變化
+function onDateSelectChange() {
+    const dateSelect = document.getElementById('dateSelect');
+    const selectedDate = dateSelect.value;
+
+    // 高亮導航欄對應的日期項目
+    highlightNavDateItem(selectedDate);
+
+    // 載入對應日期的產品
+    loadProducts();
+}
+
+// 高亮導航欄對應的日期項目
+function highlightNavDateItem(selectedDate) {
+    const navDateMenu = document.getElementById('navDateMenu');
+    const dateItems = navDateMenu.querySelectorAll('.dropdown-item');
+
+    dateItems.forEach(item => {
+        if (item.getAttribute('data-date') === selectedDate) {
+            item.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+        } else {
+            item.style.backgroundColor = '';
+        }
+    });
+}
+
 // 顯示產品
 function displayProducts(products) {
     const productsContainer = document.getElementById('productsContainer');
@@ -109,7 +225,7 @@ function displayProducts(products) {
 
     // 將產品按照產品名稱進行 grouping
     const groupedProducts = groupProductsByName(products);
-    
+
     let html = '';
     groupedProducts.forEach(group => {
         const productImageHtml = group.imageUrl ?
@@ -126,22 +242,22 @@ function displayProducts(products) {
             // 多個類型：顯示類型選擇器
             const groupId = `group_${group.name.replace(/\s+/g, '_')}`;
             priceDisplay = `<p class="product-price" id="price-${groupId}">請選擇類型</p>`;
-            
+
             typeSelector = `
                 <div class="size-selector">
                     <label for="type-${groupId}">類型選擇：</label>
                     <select id="type-${groupId}" onchange="updateProductPrice('${groupId}')">
                         <option value="">請選擇類型</option>
-                        ${group.variants.map(variant => 
+                        ${group.variants.map(variant =>
                             `<option value="${variant.id}" data-price="${variant.price}" data-remaining="${variant.remaining}" data-total="${variant.total}">
                                 ${variant.type} - NT$ ${variant.price}
                             </option>`
                         ).join('')}
                     </select>
                 </div>`;
-            
+
             stockDisplay = `<p class="product-stock" id="stock-${groupId}">請先選擇類型</p>`;
-            
+
             addToOrderButton = `
                 <button class="add-to-order-btn" id="btn-${groupId}"
                         onclick="addVariantToOrder('${groupId}')" disabled>
@@ -153,18 +269,18 @@ function displayProducts(products) {
             const stockClass = getStockClass(variant.remaining, variant.total);
             const stockText = getStockText(variant.remaining, variant.total);
             const isAvailable = variant.remaining > 0;
-            
+
             priceDisplay = `<p class="product-price">NT$ ${variant.price}</p>`;
-            
+
             // 顯示類型資訊
             typeSelector = `
                 <div class="product-type-info">
                     <span class="type-label">類型：</span>
                     <span class="type-value">${variant.type}</span>
                 </div>`;
-            
+
             stockDisplay = `<p class="product-stock ${stockClass}">${stockText}</p>`;
-            
+
             addToOrderButton = `
                 <button class="add-to-order-btn"
                         onclick="addToOrder('${variant.id}')"
@@ -195,7 +311,7 @@ function displayProducts(products) {
 // 將產品按照產品名稱進行 grouping
 function groupProductsByName(products) {
     const groups = {};
-    
+
     products.forEach(product => {
         if (!groups[product.name]) {
             groups[product.name] = {
@@ -205,7 +321,7 @@ function groupProductsByName(products) {
                 variants: []
             };
         }
-        
+
         groups[product.name].variants.push({
             id: product.id,
             type: product.type,
@@ -214,7 +330,7 @@ function groupProductsByName(products) {
             remaining: product.remaining
         });
     });
-    
+
     // 將物件轉換為陣列並按類型排序
     return Object.values(groups).map(group => {
         group.variants.sort((a, b) => {
@@ -251,21 +367,21 @@ function updateProductPrice(groupId) {
     const priceDisplay = document.getElementById(`price-${groupId}`);
     const stockDisplay = document.getElementById(`stock-${groupId}`);
     const addButton = document.getElementById(`btn-${groupId}`);
-    
+
     if (typeSelect.value) {
         const selectedOption = typeSelect.options[typeSelect.selectedIndex];
         const price = selectedOption.getAttribute('data-price');
         const remaining = parseInt(selectedOption.getAttribute('data-remaining'));
         const total = parseInt(selectedOption.getAttribute('data-total'));
-        
+
         priceDisplay.textContent = `NT$ ${price}`;
-        
+
         // 更新庫存顯示
         const stockClass = getStockClass(remaining, total);
         const stockText = getStockText(remaining, total);
         stockDisplay.textContent = stockText;
         stockDisplay.className = `product-stock ${stockClass}`;
-        
+
         // 更新按鈕狀態
         if (remaining > 0) {
             addButton.textContent = '加入訂單';
@@ -295,7 +411,7 @@ function addVariantToOrder(groupId) {
     const productId = selectedOption.value;
     const price = parseInt(selectedOption.getAttribute('data-price'));
     const remaining = parseInt(selectedOption.getAttribute('data-remaining'));
-    
+
     // 找到對應的產品資料
     const product = products.find(p => p.id === productId);
     if (!product) {
@@ -604,38 +720,20 @@ function showFormSubmissionInstructions() {
     messageDiv.scrollIntoView({ behavior: 'smooth' });
 }
 
-// 載入可用日期 (額外功能)
-async function loadAvailableDates() {
-    try {
-        const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=getAvailableDates`);
-        const data = await response.json();
-
-        if (data.success && data.data) {
-            const dateSelect = document.getElementById('dateSelect');
-            const pickupDateSelect = document.getElementById('pickupDate');
-
-            // 更新日期選項 (可選功能)
-            data.data.forEach(date => {
-                const option = document.createElement('option');
-                option.value = date;
-                option.textContent = formatDisplayDate(date);
-                // 可以加到 select 中，但現在先保持簡單
-            });
-        }
-    } catch (error) {
-        console.error('載入可用日期失敗:', error);
-    }
-}
 
 // 格式化顯示日期
 function formatDisplayDate(dateString) {
+    console.log('formatDisplayDate 被調用，輸入:', dateString);
     const date = new Date(dateString);
-    return date.toLocaleDateString('zh-TW', {
+    console.log('轉換後的日期對象:', date);
+    const formatted = date.toLocaleDateString('zh-TW', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
         weekday: 'short'
     });
+    console.log('格式化後的日期:', formatted);
+    return formatted;
 }
 
 // 更新footer年份

@@ -19,6 +19,12 @@
                     <li class="nav-item">
                         <a href="#products" class="nav-link">今日甜點</a>
                     </li>
+                    <li class="nav-item nav-dropdown">
+                        <a href="#" class="nav-link dropdown-toggle">甜點開單日</a>
+                        <ul class="dropdown-menu" id="navDateMenu">
+                            <li class="dropdown-item loading">載入中...</li>
+                        </ul>
+                    </li>
                     <li class="nav-item">
                         <a href="#order" class="nav-link">線上訂購</a>
                     </li>
@@ -44,7 +50,7 @@
                 <h2>今日甜點</h2>
                 <div class="date-selector">
                     <label for="dateSelect">選擇日期：</label>
-                    <input type="date" id="dateSelect" onchange="loadProducts()">
+                    <input type="date" id="dateSelect" onchange="onDateSelectChange()">
                 </div>
                 <div id="productsContainer" class="products-grid">
                     <div class="loading">載入中...</div>
