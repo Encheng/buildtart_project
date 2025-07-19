@@ -31,6 +31,7 @@ function initializePage() {
     loadProducts();
     loadAvailableDates();
     setupScrolling();
+    setupMobileDropdown();
 
     // 移除原本的表單提交事件，改用新的訂單處理
     document.getElementById('orderForm').addEventListener('submit', handleOrderSubmit);
@@ -44,13 +45,62 @@ function scrollToProducts() {
 function setupScrolling() {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
+            const href = this.getAttribute('href');
+            
+            // 如果是 dropdown-toggle，不處理滾動
+            if (this.classList.contains('dropdown-toggle')) {
+                return;
+            }
+            
+            // 如果 href 只是 "#"，不處理
+            if (href === '#') {
+                e.preventDefault();
+                return;
+            }
+            
             e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
+            const target = document.querySelector(href);
             if (target) {
                 target.scrollIntoView({ behavior: 'smooth' });
             }
         });
     });
+}
+
+// 設定手機版下拉選單
+function setupMobileDropdown() {
+    const dropdownToggle = document.querySelector('.dropdown-toggle');
+    const navDropdown = document.querySelector('.nav-dropdown');
+    const dropdownMenu = document.querySelector('.dropdown-menu');
+    
+    if (dropdownToggle && navDropdown && dropdownMenu) {
+        dropdownToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // 檢查是否在手機版本（768px 以下）
+            if (window.innerWidth <= 768) {
+                navDropdown.classList.toggle('active');
+                dropdownMenu.classList.toggle('show');
+            }
+        });
+        
+        // 監聽視窗大小變化
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                // 桌面版本：移除手機版的類別
+                navDropdown.classList.remove('active');
+                dropdownMenu.classList.remove('show');
+            }
+        });
+        
+        // 點擊日期項目後關閉下拉選單（手機版）
+        dropdownMenu.addEventListener('click', function(e) {
+            if (e.target.classList.contains('dropdown-item') && window.innerWidth <= 768) {
+                navDropdown.classList.remove('active');
+                dropdownMenu.classList.remove('show');
+            }
+        });
+    }
 }
 
 // 載入產品數據
@@ -98,17 +148,12 @@ async function loadProducts() {
 // 載入可用日期
 async function loadAvailableDates() {
     try {
-        console.log('開始載入可用日期...');
         const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=getAvailableDates`);
         const data = await response.json();
-        console.log('載入可用日期回應:', data);
 
         if (data.success) {
             // 根據 createResponse 函數的邏輯，陣列會被設定為 products 屬性
             const dates = data.products || data.data || [];
-            console.log('找到的日期:', dates);
-            console.log('data.products:', data.products);
-            console.log('data.data:', data.data);
             populateNavDateSelect(dates);
         } else {
             console.error('載入可用日期失敗:', data.message);
@@ -120,11 +165,7 @@ async function loadAvailableDates() {
 
 // 填充導航欄日期選擇器
 function populateNavDateSelect(dates) {
-    console.log('populateNavDateSelect 被調用，日期數量:', dates.length);
-    console.log('日期內容:', dates);
-
     const navDateMenu = document.getElementById('navDateMenu');
-    console.log('navDateMenu 元素:', navDateMenu);
 
     if (!navDateMenu) {
         console.error('找不到 navDateMenu 元素');
@@ -135,7 +176,6 @@ function populateNavDateSelect(dates) {
     navDateMenu.innerHTML = '';
 
     if (dates.length === 0) {
-        console.log('沒有日期資料，顯示暫無可用日期');
         const noDateItem = document.createElement('li');
         noDateItem.className = 'dropdown-item loading';
         noDateItem.textContent = '暫無可用日期';
@@ -145,10 +185,8 @@ function populateNavDateSelect(dates) {
 
     // 添加日期選項
     const currentDate = document.getElementById('dateSelect').value;
-    console.log('當前選中的日期:', currentDate);
 
-    dates.forEach((date, index) => {
-        console.log(`處理日期 ${index + 1}:`, date);
+    dates.forEach(date => {
         const dateItem = document.createElement('li');
         dateItem.className = 'dropdown-item';
         dateItem.textContent = formatDisplayDate(date);
@@ -164,10 +202,7 @@ function populateNavDateSelect(dates) {
         }
 
         navDateMenu.appendChild(dateItem);
-        console.log(`已添加日期項目:`, dateItem);
     });
-
-    console.log('所有日期項目已添加完成，總共:', dates.length, '個');
 }
 
 // 處理導航欄日期選擇
@@ -723,17 +758,13 @@ function showFormSubmissionInstructions() {
 
 // 格式化顯示日期
 function formatDisplayDate(dateString) {
-    console.log('formatDisplayDate 被調用，輸入:', dateString);
     const date = new Date(dateString);
-    console.log('轉換後的日期對象:', date);
-    const formatted = date.toLocaleDateString('zh-TW', {
+    return date.toLocaleDateString('zh-TW', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
         weekday: 'short'
     });
-    console.log('格式化後的日期:', formatted);
-    return formatted;
 }
 
 // 更新footer年份

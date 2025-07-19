@@ -997,6 +997,15 @@ footer {
     }
 }
 
+/* 桌面版本保持 hover 效果 */
+@media (min-width: 769px) {
+    .nav-dropdown:hover .dropdown-menu {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .nav-container {
@@ -1023,22 +1032,77 @@ footer {
     }
 
     /* 響應式導航欄下拉選單 */
+    .nav-dropdown {
+        display: block;
+        width: 100%;
+    }
+
     .dropdown-menu {
-        position: relative;
-        opacity: 1;
-        visibility: visible;
-        transform: none;
+        position: static;
+        opacity: 0;
+        visibility: hidden;
+        max-height: 0;
+        overflow: hidden;
+        transform: translateY(-10px);
         margin-top: 0.5rem;
         min-width: 150px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .dropdown-menu.show {
+        opacity: 1 !important;
+        visibility: visible !important;
+        max-height: 400px !important;
+        transform: translateY(0) !important;
+        display: block !important;
+    }
+    
+    .dropdown-item {
+        display: block !important;
+        padding: 0.5rem 1rem !important;
+        color: white !important;
+        background-color: transparent !important;
+        border: none !important;
+        width: 100% !important;
+        text-align: left !important;
+        font-size: 0.9rem !important;
+        cursor: pointer !important;
+    }
+    
+    .dropdown-item:hover {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .dropdown-toggle {
+        cursor: pointer;
+        width: 100%;
+        text-align: center;
     }
 
     .dropdown-toggle::after {
-        display: none;
+        content: '▼';
+        font-size: 0.7rem;
+        margin-left: 0.5rem;
+        transition: transform 0.3s ease;
     }
 
+    .nav-dropdown.active .dropdown-toggle::after {
+        transform: rotate(180deg);
+    }
+
+    /* 移除桌面版 hover 效果，改用點擊 */
     .nav-dropdown:hover .dropdown-menu {
-        display: block;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        transform: translateY(-10px) !important;
+    }
+    
+    /* 但是當有 show 類別時，強制顯示 */
+    .nav-dropdown .dropdown-menu.show {
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: translateY(0) !important;
     }
 
     .social-link {
