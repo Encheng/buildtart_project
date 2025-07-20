@@ -642,10 +642,20 @@ h1, h2, h3, h4, h5, h6, p, div, span, a, button, input, select, textarea, label 
     transition: border-color 0.3s ease;
 }
 
-.form-group input[readonly] {
+.form-group input[readonly],
+.form-group input[disabled] {
     background-color: #f8f9fa;
     color: #6c757d;
     cursor: not-allowed;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.form-group input[disabled]::-webkit-calendar-picker-indicator {
+    display: none;
+    -webkit-appearance: none;
 }
 
 .form-group label small {

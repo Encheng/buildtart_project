@@ -576,7 +576,11 @@ function addVariantToOrder(groupId) {
 function updatePickupDate(selectedDate) {
     const pickupDateInput = document.getElementById('pickupDate');
     if (pickupDateInput && selectedDate) {
+        // 暫時啟用欄位以設定值，然後恢復disabled狀態
+        const wasDisabled = pickupDateInput.disabled;
+        pickupDateInput.disabled = false;
         pickupDateInput.value = selectedDate;
+        pickupDateInput.disabled = wasDisabled;
         // 觸發交易方式選項更新
         updateDeliveryOptions();
     }
@@ -741,8 +745,16 @@ function handleOrderSubmit(e) {
         return;
     }
 
+    // 暫時啟用取貨日期欄位以確保值能被正確提交
+    const pickupDateInput = document.getElementById('pickupDate');
+    const wasDisabled = pickupDateInput.disabled;
+    pickupDateInput.disabled = false;
+    
     // 收集表單資料
     const formData = new FormData(e.target);
+    
+    // 恢復原本的disabled狀態
+    pickupDateInput.disabled = wasDisabled;
     const customerName = formData.get('customerName').trim();
     const customerPhone = formData.get('customerPhone').trim();
     const customerInstagram = formData.get('customerInstagram').trim();
