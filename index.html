@@ -15,14 +15,14 @@
                     <img src="logo.jpg" alt="築塔 STUDIO" class="logo-image">
                     <h1 class="logo-text">築塔 STUDIO</h1>
                 </div>
-                
+
                 <!-- 漢堡選單按鈕 (僅手機版顯示) -->
                 <button class="hamburger-menu" id="hamburgerBtn" aria-label="開啟選單">
                     <span class="hamburger-line"></span>
                     <span class="hamburger-line"></span>
                     <span class="hamburger-line"></span>
                 </button>
-                
+
                 <!-- 導航選單 -->
                 <div class="nav-menu-wrapper" id="navMenuWrapper">
                     <ul class="nav-menu">
@@ -87,8 +87,8 @@
                             <input type="text" id="customerInstagram" name="customerInstagram" placeholder="請輸入Instagram帳號 (不需要@)" required>
                         </div>
                         <div class="form-group">
-                            <label for="pickupDate">取貨日期 *</label>
-                            <input type="date" id="pickupDate" name="pickupDate" required onchange="updateDeliveryOptions()">
+                            <label for="pickupDate">取貨日期 * <small>(自動帶入甜點的選擇日期)</small></label>
+                            <input type="date" id="pickupDate" name="pickupDate" required readonly onchange="updateDeliveryOptions()">
                         </div>
                         <div class="form-group">
                             <label for="deliveryMethod">交易方式 *</label>

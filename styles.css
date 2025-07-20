@@ -675,6 +675,18 @@ h1, h2, h3, h4, h5, h6, p, div, span, a, button, input, select, textarea, label 
     transition: border-color 0.3s ease;
 }
 
+.form-group input[readonly] {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
+.form-group label small {
+    font-weight: normal;
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
 /* Address Selectors */
 .address-selectors {
     display: grid;
@@ -1325,4 +1337,39 @@ footer {
     border: 1px solid #f5c6cb;
     border-radius: 5px;
     margin-bottom: 1rem;
+}
+
+/* 日期切換通知樣式 */
+.date-change-notification {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff3cd;
+    color: #856404;
+    padding: 1rem 2rem;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 10000;
+    font-size: 1rem;
+    font-weight: 500;
+    animation: slideInNotification 0.3s ease-out;
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+@keyframes slideInNotification {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
 }

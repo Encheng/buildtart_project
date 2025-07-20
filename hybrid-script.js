@@ -9,6 +9,7 @@ let products = [];
 let orderItems = [];
 let totalAmount = 0;
 let taiwanAddressData = null;
+let currentSelectedDate = null; // 追蹤當前選擇的商品日期
 
 // DOM 載入完成後初始化
 document.addEventListener('DOMContentLoaded', function() {
@@ -155,6 +156,12 @@ function setupMobileDropdown() {
 async function loadProducts() {
     const selectedDate = document.getElementById('dateSelect').value;
     const productsContainer = document.getElementById('productsContainer');
+    
+    // 更新當前選擇的商品日期
+    currentSelectedDate = selectedDate;
+    
+    // 自動更新取貨日期為商品日期
+    updatePickupDate(selectedDate);
 
     try {
         productsContainer.innerHTML = `
@@ -180,6 +187,8 @@ async function loadProducts() {
         if (data.success) {
             products = data.products || [];
             displayProducts(products);
+            // 清空跨日期的訂單項目
+            clearCrossDayOrderItems();
         } else {
             throw new Error(data.message || '載入產品資料失敗');
         }
@@ -256,6 +265,20 @@ function populateNavDateSelect(dates) {
 // 處理導航欄日期選擇
 function onNavDateSelect(selectedDate) {
     if (selectedDate) {
+        // 檢查是否有跨日期的訂單項目
+        if (orderItems.length > 0 && currentSelectedDate && currentSelectedDate !== selectedDate) {
+            const confirmSwitch = confirm(
+                `切換日期將清空目前的訂單項目。\n\n` +
+                `目前訂單：${currentSelectedDate}\n` +
+                `切換至：${selectedDate}\n\n` +
+                `確定要繼續嗎？`
+            );
+            
+            if (!confirmSwitch) {
+                return; // 取消切換
+            }
+        }
+        
         // 同步更新產品區域的日期選擇器
         document.getElementById('dateSelect').value = selectedDate;
 
@@ -271,6 +294,22 @@ function onNavDateSelect(selectedDate) {
 function onDateSelectChange() {
     const dateSelect = document.getElementById('dateSelect');
     const selectedDate = dateSelect.value;
+    
+    // 檢查是否有跨日期的訂單項目
+    if (orderItems.length > 0 && currentSelectedDate && currentSelectedDate !== selectedDate) {
+        const confirmSwitch = confirm(
+            `切換日期將清空目前的訂單項目。\n\n` +
+            `目前訂單：${currentSelectedDate}\n` +
+            `切換至：${selectedDate}\n\n` +
+            `確定要繼續嗎？`
+        );
+        
+        if (!confirmSwitch) {
+            // 恢復到原來的日期
+            dateSelect.value = currentSelectedDate;
+            return;
+        }
+    }
 
     // 高亮導航欄對應的日期項目
     highlightNavDateItem(selectedDate);
@@ -501,6 +540,12 @@ function addVariantToOrder(groupId) {
         alert('找不到此產品');
         return;
     }
+    
+    // 檢查是否為跨日期商品
+    if (!canAddProductFromDifferentDate(currentSelectedDate)) {
+        alert('無法加入不同日期的商品，請先清空目前訂單或選擇相同日期的商品');
+        return;
+    }
 
     if (remaining === 0) {
         alert('此產品已售完');
@@ -531,11 +576,68 @@ function addVariantToOrder(groupId) {
     document.getElementById('order').scrollIntoView({ behavior: 'smooth' });
 }
 
+// 更新取貨日期為商品日期
+function updatePickupDate(selectedDate) {
+    const pickupDateInput = document.getElementById('pickupDate');
+    if (pickupDateInput && selectedDate) {
+        pickupDateInput.value = selectedDate;
+        // 觸發交易方式選項更新
+        updateDeliveryOptions();
+    }
+}
+
+// 清空跨日期的訂單項目
+function clearCrossDayOrderItems() {
+    if (orderItems.length > 0) {
+        orderItems = [];
+        updateOrderDisplay();
+        updateTotalAmount();
+        
+        // 顯示清空提示
+        showDateChangeNotification();
+    }
+}
+
+// 顯示日期切換通知
+function showDateChangeNotification() {
+    const notification = document.createElement('div');
+    notification.className = 'date-change-notification';
+    notification.innerHTML = `
+        <div class="notification-content">
+            ⚠️ 已切換商品日期，訂單已清空
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // 3秒後移除通知
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 3000);
+}
+
+// 檢查是否可以加入不同日期的商品
+function canAddProductFromDifferentDate(productDate) {
+    if (orderItems.length === 0) {
+        return true; // 沒有訂單項目，可以加入
+    }
+    
+    return currentSelectedDate === productDate; // 只能加入相同日期的商品
+}
+
 // 訂單相關函數
 function addToOrder(productId) {
     const product = products.find(p => p.id === productId);
     if (!product || product.remaining === 0) {
         alert('此產品已售完');
+        return;
+    }
+    
+    // 檢查是否為跨日期商品
+    if (!canAddProductFromDifferentDate(currentSelectedDate)) {
+        alert('無法加入不同日期的商品，請先清空目前訂單或選擇相同日期的商品');
         return;
     }
 
