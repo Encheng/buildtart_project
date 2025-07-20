@@ -38,10 +38,6 @@ function initializePage() {
     document.getElementById('orderForm').addEventListener('submit', handleOrderSubmit);
 }
 
-// 設定滾動功能
-function scrollToProducts() {
-    document.getElementById('products').scrollIntoView({ behavior: 'smooth' });
-}
 
 function setupScrolling() {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {

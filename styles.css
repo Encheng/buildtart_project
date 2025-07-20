@@ -209,40 +209,6 @@ h1, h2, h3, h4, h5, h6, p, div, span, a, button, input, select, textarea, label 
     background-color: transparent;
 }
 
-/* Hero Section */
-.hero {
-    background: linear-gradient(135deg, #F5F2EA 0%, #E8E0D0 100%);
-    padding: 120px 0 80px;
-    text-align: center;
-    margin-top: 80px;
-}
-
-.hero-content h2 {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    color: #8B7355;
-}
-
-.hero-content p {
-    font-size: 1.2rem;
-    margin-bottom: 2rem;
-    color: #5D4E37;
-}
-
-.cta-button {
-    background-color: #8B7355;
-    color: white;
-    padding: 12px 30px;
-    border: none;
-    border-radius: 25px;
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.cta-button:hover {
-    background-color: #6F5A42;
-}
 
 /* Products Section */
 .products-section {
@@ -260,6 +226,7 @@ h1, h2, h3, h4, h5, h6, p, div, span, a, button, input, select, textarea, label 
 .date-selector {
     text-align: center;
     margin-bottom: 2rem;
+    display: none; /* 隱藏日期選擇器，統一從導航欄選擇日期 */
 }
 
 .date-selector label {
@@ -1211,13 +1178,6 @@ footer {
         margin-left: 0;
     }
 
-    .hero {
-        padding: 100px 0 60px;
-    }
-
-    .hero-content h2 {
-        font-size: 2rem;
-    }
 
     .products-grid {
         grid-template-columns: 1fr;
@@ -1300,9 +1260,6 @@ footer {
         padding: 0 10px;
     }
 
-    .hero-content h2 {
-        font-size: 1.5rem;
-    }
 
     .products-section h2,
     .order-section h2,

@@ -26,9 +26,6 @@
                 <!-- 導航選單 -->
                 <div class="nav-menu-wrapper" id="navMenuWrapper">
                     <ul class="nav-menu">
-                        <li class="nav-item">
-                            <a href="#products" class="nav-link">今日甜點</a>
-                        </li>
                         <li class="nav-item nav-dropdown">
                             <a href="#" class="nav-link dropdown-toggle">甜點開單日</a>
                             <ul class="dropdown-menu" id="navDateMenu">
@@ -48,17 +45,9 @@
     </header>
 
     <main>
-        <section class="hero">
-            <div class="hero-content">
-                <h2>每日手作甜點</h2>
-                <p>精選當日新鮮製作的美味甜點</p>
-                <button class="cta-button" onclick="scrollToProducts()">查看今日甜點</button>
-            </div>
-        </section>
 
         <section id="products" class="products-section">
             <div class="container">
-                <h2>今日甜點</h2>
                 <div class="date-selector">
                     <label for="dateSelect">選擇日期：</label>
                     <input type="date" id="dateSelect" onchange="onDateSelectChange()">
