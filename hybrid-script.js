@@ -36,8 +36,39 @@ function initializePage() {
 
     // 移除原本的表單提交事件，改用新的訂單處理
     document.getElementById('orderForm').addEventListener('submit', handleOrderSubmit);
+    
+    // 添加交易方式變更監聽器
+    setupDeliveryMethodListener();
 }
 
+// 設定交易方式變更監聽器
+function setupDeliveryMethodListener() {
+    const deliveryMethodSelect = document.getElementById('deliveryMethod');
+    if (deliveryMethodSelect) {
+        deliveryMethodSelect.addEventListener('change', function() {
+            const selectedMethod = this.value;
+            if (selectedMethod.includes('新竹')) {
+                populateCityOptions('新竹');
+            } else if (selectedMethod.includes('台中')) {
+                populateCityOptions('台中');
+            } else if (selectedMethod === '') {
+                // 如果沒有選擇交易方式，根據當前日期決定地址選項
+                const pickupDateInput = document.getElementById('pickupDate');
+                if (pickupDateInput.value) {
+                    const selectedDate = new Date(pickupDateInput.value);
+                    const dayOfWeek = selectedDate.getDay();
+                    if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+                        populateCityOptions('新竹');
+                    } else if (dayOfWeek === 6 || dayOfWeek === 0) {
+                        populateCityOptions('台中');
+                    }
+                } else {
+                    populateCityOptions();
+                }
+            }
+        });
+    }
+}
 
 function setupScrolling() {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -941,6 +972,8 @@ function updateDeliveryOptions() {
 
     if (!pickupDateInput.value) {
         deliveryMethodSelect.innerHTML = '<option value="">請先選擇取貨日期</option>';
+        // 沒有日期時，重置地址選項為所有縣市
+        populateCityOptions();
         return;
     }
 
@@ -957,6 +990,8 @@ function updateDeliveryOptions() {
             <option value="新竹-面交 (19:00)">新竹 - 面交 (19:00)</option>
             <option value="新竹-外送 (20:00~22:00, 無法指定時間)">新竹 - 外送 (20:00~22:00, 無法指定時間)</option>
         `;
+        // 自動更新地址選項為新竹
+        populateCityOptions('新竹');
     }
     // 週六、週日 (6, 0)：顯示台中選項
     else if (dayOfWeek === 6 || dayOfWeek === 0) {
@@ -964,6 +999,8 @@ function updateDeliveryOptions() {
             <option value="">請選擇交易方式</option>
             <option value="台中-外送 (14:00~16:00, 無法指定時間)">台中 - 外送 (14:00~16:00, 無法指定時間)</option>
         `;
+        // 自動更新地址選項為台中
+        populateCityOptions('台中');
     }
 }
 
@@ -982,18 +1019,40 @@ async function loadTaiwanAddressData() {
 }
 
 // 填充縣市選項
-function populateCityOptions() {
+function populateCityOptions(filterByDeliveryMethod = null) {
     const citySelect = document.getElementById('citySelect');
     if (!citySelect || !taiwanAddressData) return;
 
     citySelect.innerHTML = '<option value="">請選擇縣市</option>';
 
+    // 根據交易方式篩選可選縣市
+    let allowedCities = [];
+    if (filterByDeliveryMethod) {
+        if (filterByDeliveryMethod.includes('新竹')) {
+            allowedCities = ['新竹市', '新竹縣'];
+        } else if (filterByDeliveryMethod.includes('台中')) {
+            allowedCities = ['臺中市'];
+        }
+    }
+
     taiwanAddressData.forEach(city => {
+        // 如果有篩選條件且該城市不在允許列表中，則跳過
+        if (allowedCities.length > 0 && !allowedCities.includes(city.CityName)) {
+            return;
+        }
+        
         const option = document.createElement('option');
         option.value = city.CityName;
         option.textContent = city.CityName;
         citySelect.appendChild(option);
     });
+
+    // 清空區域選項當縣市選項改變時
+    const districtSelect = document.getElementById('districtSelect');
+    if (districtSelect) {
+        districtSelect.innerHTML = '<option value="">請先選擇縣市</option>';
+        districtSelect.disabled = true;
+    }
 }
 
 // 更新區域選項
@@ -1061,7 +1120,7 @@ function getBackupAddressData() {
             ]
         },
         {
-            "CityName": "台中市",
+            "CityName": "臺中市",
             "AreaList": [
                 {"AreaName": "中區"}, {"AreaName": "東區"}, {"AreaName": "南區"},
                 {"AreaName": "西區"}, {"AreaName": "北區"}, {"AreaName": "北屯區"},
