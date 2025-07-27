@@ -10,6 +10,7 @@ let orderItems = [];
 let totalAmount = 0;
 let taiwanAddressData = null;
 let currentSelectedDate = null; // 追蹤當前選擇的商品日期
+let isFirstTimeAddingProduct = true; // 追蹤是否為第一次加入商品
 
 // DOM 載入完成後初始化
 document.addEventListener('DOMContentLoaded', function() {
@@ -39,6 +40,9 @@ function initializePage() {
 
     // 添加交易方式變更監聽器
     setupDeliveryMethodListener();
+    
+    // 初始化浮動購物車
+    updateFloatingCartBadge();
 }
 
 // 設定交易方式變更監聽器
@@ -662,7 +666,18 @@ function addVariantToOrder(groupId) {
 
     updateOrderDisplay();
     updateTotalAmount();
-    document.getElementById('order').scrollIntoView({ behavior: 'smooth' });
+    
+    // 第一次加入商品時顯示通知並跳轉到表單，之後只顯示通知
+    if (isFirstTimeAddingProduct) {
+        isFirstTimeAddingProduct = false;
+        showAddToCartNotification(`${product.name} (${product.type})`, existingItem ? '數量已更新' : '已加入訂單');
+        // 延遲跳轉，讓用戶先看到通知效果
+        setTimeout(() => {
+            document.getElementById('order').scrollIntoView({ behavior: 'smooth' });
+        }, 500);
+    } else {
+        showAddToCartNotification(`${product.name} (${product.type})`, existingItem ? '數量已更新' : '已加入訂單');
+    }
 }
 
 // 更新取貨日期為商品日期
@@ -711,6 +726,61 @@ function showDateChangeNotification() {
     }, 3000);
 }
 
+// 顯示加入購物車通知
+function showAddToCartNotification(productName, action) {
+    const notification = document.createElement('div');
+    notification.className = 'add-to-cart-notification';
+    notification.innerHTML = `
+        <div class="notification-content">
+            <div class="notification-icon">✓</div>
+            <div class="notification-text">
+                <div class="notification-title">${escapeHtml(productName)}</div>
+                <div class="notification-subtitle">${action}</div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(notification);
+
+    // 動畫效果：從右側滑入
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+
+    // 3秒後滑出並移除
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// 滾動到訂單區域
+function scrollToOrder() {
+    document.getElementById('order').scrollIntoView({ behavior: 'smooth' });
+}
+
+// 更新浮動購物車徽章
+function updateFloatingCartBadge() {
+    const cartBadge = document.getElementById('cartBadge');
+    const floatingCart = document.getElementById('floatingCart');
+    
+    if (cartBadge && floatingCart) {
+        const totalItems = orderItems.reduce((sum, item) => sum + item.quantity, 0);
+        cartBadge.textContent = totalItems;
+        
+        // 當沒有商品時隱藏浮動購物車
+        if (totalItems === 0) {
+            floatingCart.style.display = 'none';
+        } else {
+            floatingCart.style.display = 'flex';
+        }
+    }
+}
+
 // 檢查是否可以加入不同日期的商品
 function canAddProductFromDifferentDate(productDate) {
     if (orderItems.length === 0) {
@@ -755,7 +825,18 @@ function addToOrder(productId) {
 
     updateOrderDisplay();
     updateTotalAmount();
-    document.getElementById('order').scrollIntoView({ behavior: 'smooth' });
+    
+    // 第一次加入商品時顯示通知並跳轉到表單，之後只顯示通知
+    if (isFirstTimeAddingProduct) {
+        isFirstTimeAddingProduct = false;
+        showAddToCartNotification(product.name, existingItem ? '數量已更新' : '已加入訂單');
+        // 延遲跳轉，讓用戶先看到通知效果
+        setTimeout(() => {
+            document.getElementById('order').scrollIntoView({ behavior: 'smooth' });
+        }, 500);
+    } else {
+        showAddToCartNotification(product.name, existingItem ? '數量已更新' : '已加入訂單');
+    }
 }
 
 function updateOrderDisplay() {
@@ -784,6 +865,7 @@ function updateOrderDisplay() {
     });
 
     orderItemsContainer.innerHTML = html;
+    updateFloatingCartBadge();
 }
 
 function updateQuantity(productId, change) {
