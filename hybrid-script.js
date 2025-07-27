@@ -40,7 +40,7 @@ function initializePage() {
 
     // 添加交易方式變更監聽器
     setupDeliveryMethodListener();
-    
+
     // 初始化浮動購物車
     updateFloatingCartBadge();
 }
@@ -425,8 +425,8 @@ function displayProducts(products) {
     if (products.length === 0) {
         productsContainer.innerHTML = `
             <div class="no-products-message">
-                <h3>今日暫無商品</h3>
-                <p>請選擇其他日期或稍後再來看看</p>
+                <h3>注意事項</h3>
+                <p>請選擇右上角出貨日期</p>
             </div>`;
         return;
     }
@@ -449,10 +449,10 @@ function displayProducts(products) {
         if (group.variants.length > 1) {
             // 多個類型：顯示類型選擇器
             const groupId = `group_${group.name.replace(/\s+/g, '_')}`;
-            
+
             // 找到小塔類型作為預設選擇
             const defaultVariant = group.variants.find(variant => variant.type === '小塔') || group.variants[0];
-            
+
             priceDisplay = `<p class="product-price" id="price-${groupId}">NT$ ${defaultVariant.price}</p>`;
 
             typeSelector = `
@@ -666,7 +666,7 @@ function addVariantToOrder(groupId) {
 
     updateOrderDisplay();
     updateTotalAmount();
-    
+
     // 第一次加入商品時顯示通知並跳轉到表單，之後只顯示通知
     if (isFirstTimeAddingProduct) {
         isFirstTimeAddingProduct = false;
@@ -701,6 +701,9 @@ function clearCrossDayOrderItems() {
         updateOrderDisplay();
         updateTotalAmount();
 
+        // 重置第一次加入商品的標記
+        isFirstTimeAddingProduct = true;
+
         // 顯示清空提示
         showDateChangeNotification();
     }
@@ -712,7 +715,7 @@ function showDateChangeNotification() {
     notification.className = 'date-change-notification';
     notification.innerHTML = `
         <div class="notification-content">
-            ⚠️ 已切換商品日期，訂單已清空
+            ⚠️ 已切換出貨日期，訂單已清空
         </div>
     `;
 
@@ -767,11 +770,11 @@ function scrollToOrder() {
 function updateFloatingCartBadge() {
     const cartBadge = document.getElementById('cartBadge');
     const floatingCart = document.getElementById('floatingCart');
-    
+
     if (cartBadge && floatingCart) {
         const totalItems = orderItems.reduce((sum, item) => sum + item.quantity, 0);
         cartBadge.textContent = totalItems;
-        
+
         // 當沒有商品時隱藏浮動購物車
         if (totalItems === 0) {
             floatingCart.style.display = 'none';
@@ -825,7 +828,7 @@ function addToOrder(productId) {
 
     updateOrderDisplay();
     updateTotalAmount();
-    
+
     // 第一次加入商品時顯示通知並跳轉到表單，之後只顯示通知
     if (isFirstTimeAddingProduct) {
         isFirstTimeAddingProduct = false;
@@ -844,6 +847,7 @@ function updateOrderDisplay() {
 
     if (orderItems.length === 0) {
         orderItemsContainer.innerHTML = '<p class="text-center">尚未選擇任何商品</p>';
+        updateFloatingCartBadge();
         return;
     }
 
@@ -1008,7 +1012,7 @@ function handleOrderSubmit(e) {
 // 生成訂單摘要
 function generateOrderSummary() {
     const selectedDate = document.getElementById('dateSelect').value;
-    let summary = `訂購日期：${selectedDate}\n訂單內容：\n`;
+    let summary = `出貨日期：${selectedDate}\n訂單內容：\n`;
 
     orderItems.forEach(item => {
         // 包含產品ID和日期資訊，方便Excel公式解析
@@ -1069,7 +1073,7 @@ function showFormSubmissionInstructions() {
         <p><strong>接下來請：</strong></p>
         <ol style="text-align: left; margin-left: 20px;">
             <li>在新開啟的視窗中確認訂單資料</li>
-            <li>完成人機驗證 (如果需要)</li>
+            <li>完成人機驗證 (IG 私訊 @buildtart.studio)</li>
             <li>點擊「提交」按鈕</li>
             <li>我們會盡快與您聯繫確認訂單</li>
         </ol>
@@ -1161,8 +1165,10 @@ function updateDeliveryOptions() {
 // 載入台灣地址資料
 async function loadTaiwanAddressData() {
     try {
-        const response = await fetch('https://raw.githubusercontent.com/donma/TaiwanAddressCityAreaRoadChineseEnglishJSON/master/CityCountyData.json');
-        taiwanAddressData = await response.json();
+        // const response = await fetch('https://raw.githubusercontent.com/donma/TaiwanAddressCityAreaRoadChineseEnglishJSON/master/CityCountyData.json');
+        // taiwanAddressData = await response.json();
+        // 使用簡化資料
+        taiwanAddressData = getBackupAddressData();
         populateCityOptions();
     } catch (error) {
         console.error('載入地址資料失敗:', error);
@@ -1274,15 +1280,6 @@ function getBackupAddressData() {
             ]
         },
         {
-            "CityName": "臺中市",
-            "AreaList": [
-                {"AreaName": "中區"}, {"AreaName": "東區"}, {"AreaName": "南區"},
-                {"AreaName": "西區"}, {"AreaName": "北區"}, {"AreaName": "北屯區"},
-                {"AreaName": "西屯區"}, {"AreaName": "南屯區"}, {"AreaName": "太平區"},
-                {"AreaName": "大里區"}, {"AreaName": "霧峰區"}, {"AreaName": "烏日區"}
-            ]
-        },
-        {
             "CityName": "新竹市",
             "AreaList": [
                 {"AreaName": "東區"}, {"AreaName": "北區"}, {"AreaName": "香山區"}
@@ -1291,9 +1288,53 @@ function getBackupAddressData() {
         {
             "CityName": "新竹縣",
             "AreaList": [
-                {"AreaName": "竹北市"}, {"AreaName": "竹東鎮"}, {"AreaName": "新埔鎮"},
-                {"AreaName": "關西鎮"}, {"AreaName": "湖口鄉"}, {"AreaName": "新豐鄉"},
-                {"AreaName": "芎林鄉"}, {"AreaName": "橫山鄉"}, {"AreaName": "北埔鄉"}
+                {"AreaName": "寶山鄉"},
+                {"AreaName": "竹北市"},
+                {"AreaName": "湖口鄉"},
+                {"AreaName": "新豐鄉"},
+                {"AreaName": "新埔鎮"},
+                {"AreaName": "關西鎮"},
+                {"AreaName": "芎林鄉"},
+                {"AreaName": "竹東鎮"},
+                // {"AreaName": "五峰鄉"},
+                {"AreaName": "橫山鄉"},
+                // {"AreaName": "尖石鄉"},
+                {"AreaName": "北埔鄉"},
+                {"AreaName": "峨眉鄉"}
+            ]
+        },
+        {
+            "CityName": "臺中市",
+            "AreaList": [
+                {"AreaName": "中區"},
+                {"AreaName": "東區"},
+                {"AreaName": "南區"},
+                {"AreaName": "西區"},
+                {"AreaName": "北區"},
+                {"AreaName": "北屯區"},
+                {"AreaName": "西屯區"},
+                {"AreaName": "南屯區"},
+                {"AreaName": "太平區"},
+                {"AreaName": "大里區"},
+                {"AreaName": "霧峰區"},
+                {"AreaName": "烏日區"},
+                {"AreaName": "豐原區"},
+                {"AreaName": "后里區"},
+                {"AreaName": "石岡區"},
+                {"AreaName": "東勢區"},
+                {"AreaName": "和平區"},
+                {"AreaName": "新社區"},
+                {"AreaName": "潭子區"},
+                {"AreaName": "大雅區"},
+                {"AreaName": "神岡區"},
+                {"AreaName": "大肚區"},
+                {"AreaName": "沙鹿區"},
+                {"AreaName": "龍井區"},
+                {"AreaName": "梧棲區"},
+                {"AreaName": "清水區"},
+                {"AreaName": "大甲區"},
+                {"AreaName": "外埔區"},
+                {"AreaName": "大安區"}
             ]
         }
     ];
