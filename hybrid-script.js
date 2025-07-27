@@ -43,6 +43,48 @@ function initializePage() {
 
     // 初始化浮動購物車
     updateFloatingCartBadge();
+    
+    // 設定IG連結
+    setupInstagramLink();
+}
+
+// 設定IG連結
+function setupInstagramLink() {
+    const igLink = document.getElementById('igLink');
+    if (!igLink) return;
+
+    // 檢測是否為行動設備
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+        // 行動設備：設定為Instagram App深度連結
+        igLink.href = 'instagram://user?username=buildtart.studio';
+        
+        // 添加點擊事件處理，如果IG App未安裝則回退到網頁版
+        igLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // 嘗試開啟IG App
+            const appUrl = 'instagram://user?username=buildtart.studio';
+            const webUrl = 'https://www.instagram.com/buildtart.studio/';
+            
+            // 設定超時檢查，如果App沒有開啟則開啟網頁版
+            const timeout = setTimeout(() => {
+                window.open(webUrl, '_blank');
+            }, 2000);
+            
+            // 嘗試開啟App
+            window.location.href = appUrl;
+            
+            // 如果成功開啟App，頁面會失去焦點，清除超時
+            window.addEventListener('blur', function() {
+                clearTimeout(timeout);
+            }, { once: true });
+        });
+    } else {
+        // 桌面設備：保持原本的網頁連結
+        igLink.href = 'https://www.instagram.com/buildtart.studio/';
+    }
 }
 
 // 設定交易方式變更監聽器
@@ -990,6 +1032,13 @@ function handleOrderSubmit(e) {
             alert('請輸入詳細地址');
             return;
         }
+    }
+
+    // 驗證條款確認
+    const termsAgreement = document.getElementById('termsAgreement');
+    if (!termsAgreement.checked) {
+        alert('請先閱讀並勾選確認條款');
+        return;
     }
 
     // 生成訂單摘要
