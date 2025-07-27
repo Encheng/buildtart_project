@@ -25,7 +25,7 @@ h1, h2, h3, h4, h5, h6, p, div, span, a, button, input, select, textarea, label 
 
 /* Header Styles */
 .navbar {
-    background-color: #8B7355;
+    background-color: #F2ECE0;
     color: white;
     padding: 1rem 0;
     position: fixed;
@@ -65,7 +65,7 @@ h1, h2, h3, h4, h5, h6, p, div, span, a, button, input, select, textarea, label 
     font-family: DFKai-sb, '標楷體', 'BiauKai', 'serif';
     font-size: 1.8rem;
     font-weight: 700;
-    color: #D4C4A8;
+    color: #8B7355;
     margin: 0;
     letter-spacing: 1.5px;
 }
@@ -87,7 +87,7 @@ h1, h2, h3, h4, h5, h6, p, div, span, a, button, input, select, textarea, label 
 .hamburger-line {
     width: 100%;
     height: 3px;
-    background-color: white;
+    background-color: #8B7355;
     border-radius: 2px;
     transition: all 0.3s ease;
     transform-origin: center;
@@ -118,7 +118,7 @@ h1, h2, h3, h4, h5, h6, p, div, span, a, button, input, select, textarea, label 
 }
 
 .nav-link {
-    color: white;
+    color: #8B7355;
     text-decoration: none;
     font-weight: 500;
     transition: color 0.3s ease;
@@ -135,7 +135,7 @@ h1, h2, h3, h4, h5, h6, p, div, span, a, button, input, select, textarea, label 
 }
 
 .dropdown-toggle {
-    color: white;
+    color: #8B7355;
     text-decoration: none;
     font-weight: 500;
     transition: color 0.3s ease;
@@ -162,7 +162,7 @@ h1, h2, h3, h4, h5, h6, p, div, span, a, button, input, select, textarea, label 
     position: absolute;
     top: 100%;
     left: 0;
-    background-color: #8B7355;
+    background-color: #F2ECE0;
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 5px;
     min-width: 200px;
@@ -186,7 +186,7 @@ h1, h2, h3, h4, h5, h6, p, div, span, a, button, input, select, textarea, label 
 
 .dropdown-item {
     padding: 0.5rem 1rem;
-    color: white;
+    color: #8B7355;
     cursor: pointer;
     transition: background-color 0.3s ease;
     border: none;
@@ -201,7 +201,7 @@ h1, h2, h3, h4, h5, h6, p, div, span, a, button, input, select, textarea, label 
 }
 
 .dropdown-item.loading {
-    color: #D4C4A8;
+    color: #8B7355;
     cursor: default;
 }
 
@@ -382,8 +382,8 @@ h1, h2, h3, h4, h5, h6, p, div, span, a, button, input, select, textarea, label 
 }
 
 .add-to-order-btn {
-    background-color: #28a745;
-    color: white;
+    background-color: #F5F2EA;
+    color: #8B7335;
     border: none;
     padding: 10px 20px;
     border-radius: 5px;
@@ -395,11 +395,13 @@ h1, h2, h3, h4, h5, h6, p, div, span, a, button, input, select, textarea, label 
 }
 
 .add-to-order-btn:hover {
-    background-color: #218838;
+    background-color: #E8E0D0;
+    color: #5D4E37;
 }
 
 .add-to-order-btn:disabled {
-    background-color: #6c757d;
+    background-color: #F5F2EA;
+    color: #8B7335;
     cursor: not-allowed;
 }
 
@@ -774,8 +776,8 @@ h1, h2, h3, h4, h5, h6, p, div, span, a, button, input, select, textarea, label 
 }
 
 .submit-button {
-    background-color: #28a745;
-    color: white;
+    background-color: #F5F2EA;
+    color: #8B7335;
     border: none;
     padding: 15px 30px;
     border-radius: 5px;
@@ -786,7 +788,7 @@ h1, h2, h3, h4, h5, h6, p, div, span, a, button, input, select, textarea, label 
 }
 
 .submit-button:hover {
-    background-color: #218838;
+    background-color: #F5F2EA;
 }
 
 /* About Section */
@@ -824,8 +826,8 @@ h1, h2, h3, h4, h5, h6, p, div, span, a, button, input, select, textarea, label 
 
 /* Footer */
 footer {
-    background-color: #8B7355;
-    color: white;
+    background-color: #F2ECE0;
+    color: #8B7355;
     padding: 2rem 0;
 }
 
@@ -858,19 +860,19 @@ footer {
     text-decoration: none;
     border-radius: 50%;
     transition: all 0.3s ease;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 2px solid rgba(139, 115, 85, 1);
 }
 
 .social-link:hover {
     background-color: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.6);
+    border-color: rgba(139, 115, 85, 0.6);
     transform: translateY(-2px);
 }
 
 .social-icon {
     width: 20px;
     height: 20px;
-    color: white;
+    color: #8B7355;
 }
 
 .social-icon-img {
@@ -1050,14 +1052,14 @@ footer {
     .hamburger-menu {
         display: flex;
     }
-    
+
     .nav-container {
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
         gap: 0;
     }
-    
+
     /* 隱藏原本的導航選單包裝器 */
     .nav-menu-wrapper {
         position: fixed;
@@ -1065,7 +1067,7 @@ footer {
         left: 0;
         width: 100%;
         height: 100vh;
-        background-color: rgba(139, 115, 85, 0.95);
+        background-color: #F2ECE0;
         backdrop-filter: blur(10px);
         display: flex;
         align-items: center;
@@ -1074,11 +1076,11 @@ footer {
         transition: transform 0.3s ease;
         z-index: 1000;
     }
-    
+
     .nav-menu-wrapper.active {
         transform: translateX(0);
     }
-    
+
     .nav-menu {
         flex-direction: column;
         gap: 2rem;
@@ -1087,17 +1089,17 @@ footer {
         padding: 0;
         margin: 0;
     }
-    
+
     .nav-link {
         font-size: 1.2rem;
         font-weight: 600;
-        color: white;
+        color: #8B7355;
         text-decoration: none;
         padding: 1rem;
         display: block;
         transition: all 0.3s ease;
     }
-    
+
     .nav-link:hover {
         color: #D4C4A8;
         transform: scale(1.1);
@@ -1147,15 +1149,15 @@ footer {
         max-height: 400px;
         padding: 0.5rem 0;
         margin-top: 1rem;
-        background-color: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        background-color: #F2ECE0;
+        border: 1px solid #D4C4A8;
         transform: translateY(0);
     }
-    
+
     .dropdown-item {
         display: block;
         padding: 0.8rem 1.5rem;
-        color: white;
+        color: #8B7335;
         font-size: 1rem;
         cursor: pointer;
         transition: background-color 0.3s ease;
@@ -1164,7 +1166,7 @@ footer {
         width: 100%;
         text-align: center;
     }
-    
+
     .dropdown-item:hover {
         background-color: rgba(255, 255, 255, 0.1);
     }

@@ -36,7 +36,7 @@ function initializePage() {
 
     // 移除原本的表單提交事件，改用新的訂單處理
     document.getElementById('orderForm').addEventListener('submit', handleOrderSubmit);
-    
+
     // 添加交易方式變更監聽器
     setupDeliveryMethodListener();
 }
@@ -49,8 +49,8 @@ function setupDeliveryMethodListener() {
             const selectedMethod = this.value;
             if (selectedMethod.includes('新竹')) {
                 populateCityOptions('新竹');
-            } else if (selectedMethod.includes('台中')) {
-                populateCityOptions('台中');
+            } else if (selectedMethod.includes('臺中')) {
+                populateCityOptions('臺中');
             } else if (selectedMethod === '') {
                 // 如果沒有選擇交易方式，根據當前日期決定地址選項
                 const pickupDateInput = document.getElementById('pickupDate');
@@ -60,7 +60,7 @@ function setupDeliveryMethodListener() {
                     if (dayOfWeek >= 1 && dayOfWeek <= 5) {
                         populateCityOptions('新竹');
                     } else if (dayOfWeek === 6 || dayOfWeek === 0) {
-                        populateCityOptions('台中');
+                        populateCityOptions('臺中');
                     }
                 } else {
                     populateCityOptions();
@@ -74,18 +74,18 @@ function setupScrolling() {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             const href = this.getAttribute('href');
-            
+
             // 如果是 dropdown-toggle，不處理滾動
             if (this.classList.contains('dropdown-toggle')) {
                 return;
             }
-            
+
             // 如果 href 只是 "#"，不處理
             if (href === '#') {
                 e.preventDefault();
                 return;
             }
-            
+
             e.preventDefault();
             const target = document.querySelector(href);
             if (target) {
@@ -102,14 +102,14 @@ function setupMobileDropdown() {
     const dropdownToggle = document.querySelector('.dropdown-toggle');
     const navDropdown = document.querySelector('.nav-dropdown');
     const dropdownMenu = document.querySelector('.dropdown-menu');
-    
+
     // 漢堡選單點擊事件
     if (hamburgerBtn && navMenuWrapper) {
         hamburgerBtn.addEventListener('click', function(e) {
             e.preventDefault();
             hamburgerBtn.classList.toggle('active');
             navMenuWrapper.classList.toggle('active');
-            
+
             // 防止背景滾動
             if (navMenuWrapper.classList.contains('active')) {
                 document.body.style.overflow = 'hidden';
@@ -117,7 +117,7 @@ function setupMobileDropdown() {
                 document.body.style.overflow = '';
             }
         });
-        
+
         // 點擊選單項目後關閉漢堡選單
         const navLinks = navMenuWrapper.querySelectorAll('.nav-link');
         navLinks.forEach(link => {
@@ -130,7 +130,7 @@ function setupMobileDropdown() {
                 }
             });
         });
-        
+
         // 點擊背景關閉漢堡選單
         navMenuWrapper.addEventListener('click', function(e) {
             if (e.target === navMenuWrapper) {
@@ -140,19 +140,19 @@ function setupMobileDropdown() {
             }
         });
     }
-    
+
     // 下拉選單功能
     if (dropdownToggle && navDropdown && dropdownMenu) {
         dropdownToggle.addEventListener('click', function(e) {
             e.preventDefault();
-            
+
             // 在手機版本中處理下拉選單
             if (window.innerWidth <= 768) {
                 navDropdown.classList.toggle('active');
                 dropdownMenu.classList.toggle('show');
             }
         });
-        
+
         // 監聽視窗大小變化
         window.addEventListener('resize', function() {
             if (window.innerWidth > 768) {
@@ -164,7 +164,7 @@ function setupMobileDropdown() {
                 document.body.style.overflow = '';
             }
         });
-        
+
         // 點擊日期項目後關閉下拉選單（手機版）
         dropdownMenu.addEventListener('click', function(e) {
             if (e.target.classList.contains('dropdown-item') && window.innerWidth <= 768) {
@@ -183,10 +183,10 @@ function setupMobileDropdown() {
 async function loadProducts() {
     const selectedDate = document.getElementById('dateSelect').value;
     const productsContainer = document.getElementById('productsContainer');
-    
+
     // 更新當前選擇的商品日期
     currentSelectedDate = selectedDate;
-    
+
     // 自動更新取貨日期為商品日期
     updatePickupDate(selectedDate);
 
@@ -200,7 +200,7 @@ async function loadProducts() {
                         <div class="cake-layer layer-3"></div>
                         <div class="cake-topping">🍓</div>
                     </div>
-                    <div class="loading-text">正在準備美味甜點...</div>
+                    <div class="loading-text">圖片準備中...</div>
                     <div class="loading-progress">
                         <div class="progress-bar"></div>
                     </div>
@@ -300,12 +300,12 @@ function onNavDateSelect(selectedDate) {
                 `切換至：${selectedDate}\n\n` +
                 `確定要繼續嗎？`
             );
-            
+
             if (!confirmSwitch) {
                 return; // 取消切換
             }
         }
-        
+
         // 同步更新產品區域的日期選擇器
         document.getElementById('dateSelect').value = selectedDate;
 
@@ -321,7 +321,7 @@ function onNavDateSelect(selectedDate) {
 function onDateSelectChange() {
     const dateSelect = document.getElementById('dateSelect');
     const selectedDate = dateSelect.value;
-    
+
     // 檢查是否有跨日期的訂單項目
     if (orderItems.length > 0 && currentSelectedDate && currentSelectedDate !== selectedDate) {
         const confirmSwitch = confirm(
@@ -330,7 +330,7 @@ function onDateSelectChange() {
             `切換至：${selectedDate}\n\n` +
             `確定要繼續嗎？`
         );
-        
+
         if (!confirmSwitch) {
             // 恢復到原來的日期
             dateSelect.value = currentSelectedDate;
@@ -567,7 +567,7 @@ function addVariantToOrder(groupId) {
         alert('找不到此產品');
         return;
     }
-    
+
     // 檢查是否為跨日期商品
     if (!canAddProductFromDifferentDate(currentSelectedDate)) {
         alert('無法加入不同日期的商品，請先清空目前訂單或選擇相同日期的商品');
@@ -623,7 +623,7 @@ function clearCrossDayOrderItems() {
         orderItems = [];
         updateOrderDisplay();
         updateTotalAmount();
-        
+
         // 顯示清空提示
         showDateChangeNotification();
     }
@@ -638,9 +638,9 @@ function showDateChangeNotification() {
             ⚠️ 已切換商品日期，訂單已清空
         </div>
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     // 3秒後移除通知
     setTimeout(() => {
         if (notification.parentNode) {
@@ -654,7 +654,7 @@ function canAddProductFromDifferentDate(productDate) {
     if (orderItems.length === 0) {
         return true; // 沒有訂單項目，可以加入
     }
-    
+
     return currentSelectedDate === productDate; // 只能加入相同日期的商品
 }
 
@@ -665,7 +665,7 @@ function addToOrder(productId) {
         alert('此產品已售完');
         return;
     }
-    
+
     // 檢查是否為跨日期商品
     if (!canAddProductFromDifferentDate(currentSelectedDate)) {
         alert('無法加入不同日期的商品，請先清空目前訂單或選擇相同日期的商品');
@@ -766,13 +766,13 @@ function handleOrderSubmit(e) {
         return;
     }
 
-    if (orderItems.length > 10) {
-        alert('單次訂單最多10項產品');
+    if (orderItems.length > 20) {
+        alert('單次訂單最多20項產品');
         return;
     }
 
-    if (totalAmount > 20000) {
-        alert('單次訂單金額不能超過20,000元');
+    if (totalAmount > 5000) {
+        alert('單次訂單金額不能超過5,000元');
         return;
     }
 
@@ -780,10 +780,10 @@ function handleOrderSubmit(e) {
     const pickupDateInput = document.getElementById('pickupDate');
     const wasDisabled = pickupDateInput.disabled;
     pickupDateInput.disabled = false;
-    
+
     // 收集表單資料
     const formData = new FormData(e.target);
-    
+
     // 恢復原本的disabled狀態
     pickupDateInput.disabled = wasDisabled;
     const customerName = formData.get('customerName').trim();
@@ -847,11 +847,11 @@ function handleOrderSubmit(e) {
         customerPhone,
         customerInstagram,
         pickupDate,
-        deliveryMethod,
         customerAddress,
-        specialRequests,
+        deliveryMethod,
         orderSummary,
-        totalAmount
+        totalAmount,
+        specialRequests
     });
 }
 
@@ -988,19 +988,19 @@ function updateDeliveryOptions() {
         deliveryMethodSelect.innerHTML = `
             <option value="">請選擇交易方式</option>
             <option value="新竹-面交 (19:00)">新竹 - 面交 (19:00)</option>
-            <option value="新竹-外送 (20:00~22:00, 無法指定時間)">新竹 - 外送 (20:00~22:00, 無法指定時間)</option>
+            <option value="新竹-外送 (20:00~22:00, 須滿$300, 無法指定送達時間)">新竹 - 外送 (20:00~22:00, 須滿$300, 無法指定送達時間)</option>
         `;
         // 自動更新地址選項為新竹
         populateCityOptions('新竹');
     }
-    // 週六、週日 (6, 0)：顯示台中選項
+    // 週六、週日 (6, 0)：顯示臺中選項
     else if (dayOfWeek === 6 || dayOfWeek === 0) {
         deliveryMethodSelect.innerHTML = `
             <option value="">請選擇交易方式</option>
-            <option value="台中-外送 (14:00~16:00, 無法指定時間)">台中 - 外送 (14:00~16:00, 無法指定時間)</option>
+            <option value="臺中-外送 (14:00~16:00, 須滿$300, 無法指定送達時間)">臺中 - 外送 (14:00~16:00, 須滿$300, 無法指定送達時間)</option>
         `;
-        // 自動更新地址選項為台中
-        populateCityOptions('台中');
+        // 自動更新地址選項為臺中
+        populateCityOptions('臺中');
     }
 }
 
@@ -1030,7 +1030,7 @@ function populateCityOptions(filterByDeliveryMethod = null) {
     if (filterByDeliveryMethod) {
         if (filterByDeliveryMethod.includes('新竹')) {
             allowedCities = ['新竹市', '新竹縣'];
-        } else if (filterByDeliveryMethod.includes('台中')) {
+        } else if (filterByDeliveryMethod.includes('臺中')) {
             allowedCities = ['臺中市'];
         }
     }
@@ -1040,7 +1040,7 @@ function populateCityOptions(filterByDeliveryMethod = null) {
         if (allowedCities.length > 0 && !allowedCities.includes(city.CityName)) {
             return;
         }
-        
+
         const option = document.createElement('option');
         option.value = city.CityName;
         option.textContent = city.CityName;
