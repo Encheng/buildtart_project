@@ -47,6 +47,8 @@ function setupDeliveryMethodListener() {
     if (deliveryMethodSelect) {
         deliveryMethodSelect.addEventListener('change', function() {
             const selectedMethod = this.value;
+
+            // 更新地址選項
             if (selectedMethod.includes('新竹')) {
                 populateCityOptions('新竹');
             } else if (selectedMethod.includes('臺中')) {
@@ -66,7 +68,60 @@ function setupDeliveryMethodListener() {
                     populateCityOptions();
                 }
             }
+
+            // 根據交易方式設定地址欄位是否必填
+            updateAddressRequiredStatus(selectedMethod);
         });
+    }
+}
+
+// 更新地址欄位必填狀態
+function updateAddressRequiredStatus(deliveryMethod) {
+    const citySelect = document.getElementById('citySelect');
+    const districtSelect = document.getElementById('districtSelect');
+    const detailAddress = document.getElementById('detailAddress');
+
+    // 找到地址標籤 - 通過父元素查找
+    let addressLabel = null;
+    if (citySelect) {
+        const formGroup = citySelect.closest('.form-group');
+        if (formGroup) {
+            addressLabel = formGroup.querySelector('label');
+        }
+    }
+
+    // 判斷是否為面交
+    const isFaceToFace = deliveryMethod.includes('面交');
+
+    if (isFaceToFace) {
+        // 面交：地址非必填
+        if (citySelect) citySelect.removeAttribute('required');
+        if (districtSelect) districtSelect.removeAttribute('required');
+        if (detailAddress) detailAddress.removeAttribute('required');
+
+        // 更新標籤文字
+        if (addressLabel) {
+            addressLabel.innerHTML = '配送地址 <small>(面交不需填)</small>';
+        }
+
+        // 清空地址內容
+        if (citySelect) citySelect.value = '';
+        if (districtSelect) {
+            districtSelect.value = '';
+            districtSelect.disabled = true;
+        }
+        if (detailAddress) detailAddress.value = '';
+
+    } else if (deliveryMethod.includes('外送')) {
+        // 外送：地址必填
+        if (citySelect) citySelect.setAttribute('required', 'required');
+        if (districtSelect) districtSelect.setAttribute('required', 'required');
+        if (detailAddress) detailAddress.setAttribute('required', 'required');
+
+        // 更新標籤文字
+        if (addressLabel) {
+            addressLabel.innerHTML = '配送地址 *';
+        }
     }
 }
 
@@ -794,8 +849,11 @@ function handleOrderSubmit(e) {
     const city = formData.get('city');
     const district = formData.get('district');
     const detailAddress = formData.get('detailAddress').trim();
-    const customerAddress = `${city}${district}${detailAddress}`;
     const specialRequests = formData.get('specialRequests').trim();
+
+    // 判斷是否為面交
+    const isFaceToFace = deliveryMethod.includes('面交');
+    const customerAddress = isFaceToFace ? '面交' : `${city}${district}${detailAddress}`;
 
     // 基本驗證
     if (!customerName) {
@@ -823,19 +881,22 @@ function handleOrderSubmit(e) {
         return;
     }
 
-    if (!city) {
-        alert('請選擇縣市');
-        return;
-    }
+    // 地址驗證（面交時可以省略）
+    if (!isFaceToFace) {
+        if (!city) {
+            alert('請選擇縣市');
+            return;
+        }
 
-    if (!district) {
-        alert('請選擇鄉鎮市區');
-        return;
-    }
+        if (!district) {
+            alert('請選擇鄉鎮市區');
+            return;
+        }
 
-    if (!detailAddress) {
-        alert('請輸入詳細地址');
-        return;
+        if (!detailAddress) {
+            alert('請輸入詳細地址');
+            return;
+        }
     }
 
     // 生成訂單摘要
@@ -992,6 +1053,8 @@ function updateDeliveryOptions() {
         `;
         // 自動更新地址選項為新竹
         populateCityOptions('新竹');
+        // 重置地址欄位狀態（因為有面交選項）
+        updateAddressRequiredStatus('');
     }
     // 週六、週日 (6, 0)：顯示臺中選項
     else if (dayOfWeek === 6 || dayOfWeek === 0) {
@@ -1001,6 +1064,8 @@ function updateDeliveryOptions() {
         `;
         // 自動更新地址選項為臺中
         populateCityOptions('臺中');
+        // 設定地址為必填（只有外送選項）
+        updateAddressRequiredStatus('外送');
     }
 }
 
