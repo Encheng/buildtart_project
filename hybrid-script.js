@@ -445,27 +445,34 @@ function displayProducts(products) {
         if (group.variants.length > 1) {
             // 多個類型：顯示類型選擇器
             const groupId = `group_${group.name.replace(/\s+/g, '_')}`;
-            priceDisplay = `<p class="product-price" id="price-${groupId}">請選擇類型</p>`;
+            
+            // 找到小塔類型作為預設選擇
+            const defaultVariant = group.variants.find(variant => variant.type === '小塔') || group.variants[0];
+            
+            priceDisplay = `<p class="product-price" id="price-${groupId}">NT$ ${defaultVariant.price}</p>`;
 
             typeSelector = `
                 <div class="size-selector">
                     <label for="type-${groupId}">類型選擇：</label>
                     <select id="type-${groupId}" onchange="updateProductPrice('${groupId}')">
-                        <option value="">請選擇類型</option>
                         ${group.variants.map(variant =>
-                            `<option value="${variant.id}" data-price="${variant.price}" data-remaining="${variant.remaining}" data-total="${variant.total}">
+                            `<option value="${variant.id}" data-price="${variant.price}" data-remaining="${variant.remaining}" data-total="${variant.total}" ${variant.id === defaultVariant.id ? 'selected' : ''}>
                                 ${variant.type} - NT$ ${variant.price}
                             </option>`
                         ).join('')}
                     </select>
                 </div>`;
 
-            stockDisplay = `<p class="product-stock" id="stock-${groupId}">請先選擇類型</p>`;
+            const stockClass = getStockClass(defaultVariant.remaining, defaultVariant.total);
+            const stockText = getStockText(defaultVariant.remaining, defaultVariant.total);
+            stockDisplay = `<p class="product-stock ${stockClass}" id="stock-${groupId}">${stockText}</p>`;
 
+            const buttonDisabled = defaultVariant.remaining === 0;
+            const buttonText = defaultVariant.remaining === 0 ? '已售完' : '加入訂單';
             addToOrderButton = `
                 <button class="add-to-order-btn" id="btn-${groupId}"
-                        onclick="addVariantToOrder('${groupId}')" disabled>
-                    請先選擇類型
+                        onclick="addVariantToOrder('${groupId}')" ${buttonDisabled ? 'disabled' : ''}>
+                    ${buttonText}
                 </button>`;
         } else {
             // 單一類型：直接顯示
