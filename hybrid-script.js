@@ -11,6 +11,8 @@ let totalAmount = 0;
 let taiwanAddressData = null;
 let currentSelectedDate = null; // 追蹤當前選擇的商品日期
 let isFirstTimeAddingProduct = true; // 追蹤是否為第一次加入商品
+let dailyDeliveryCount = 0; // 當日外送訂單數量
+const MAX_DAILY_DELIVERY = 6; // 每日最大外送次數
 
 // DOM 載入完成後初始化
 document.addEventListener('DOMContentLoaded', function() {
@@ -43,7 +45,7 @@ function initializePage() {
 
     // 初始化浮動購物車
     updateFloatingCartBadge();
-    
+
     // 設定IG連結
     setupInstagramLink();
 }
@@ -55,27 +57,27 @@ function setupInstagramLink() {
 
     // 檢測是否為行動設備
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    
+
     if (isMobile) {
         // 行動設備：設定為Instagram App深度連結
         igLink.href = 'instagram://user?username=buildtart.studio';
-        
+
         // 添加點擊事件處理，如果IG App未安裝則回退到網頁版
         igLink.addEventListener('click', function(e) {
             e.preventDefault();
-            
+
             // 嘗試開啟IG App
             const appUrl = 'instagram://user?username=buildtart.studio';
             const webUrl = 'https://www.instagram.com/buildtart.studio/';
-            
+
             // 設定超時檢查，如果App沒有開啟則開啟網頁版
             const timeout = setTimeout(() => {
                 window.open(webUrl, '_blank');
             }, 2000);
-            
+
             // 嘗試開啟App
             window.location.href = appUrl;
-            
+
             // 如果成功開啟App，頁面會失去焦點，清除超時
             window.addEventListener('blur', function() {
                 clearTimeout(timeout);
@@ -280,6 +282,25 @@ function setupMobileDropdown() {
     }
 }
 
+// 查詢當日外送數量
+async function checkDailyDeliveryCount(date) {
+    try {
+        const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=getDeliveryCount&date=${date}`);
+        const data = await response.json();
+
+        if (data.success) {
+            dailyDeliveryCount = data.data.deliveryCount || 0;
+            console.log(`當日外送數量: ${dailyDeliveryCount}/${MAX_DAILY_DELIVERY}`);
+        } else {
+            console.error('查詢外送數量失敗:', data.message);
+            dailyDeliveryCount = 0; // 發生錯誤時預設為0，不限制外送
+        }
+    } catch (error) {
+        console.error('查詢外送數量時發生網路錯誤:', error);
+        dailyDeliveryCount = 0; // 發生錯誤時預設為0，不限制外送
+    }
+}
+
 // 載入產品數據
 async function loadProducts() {
     const selectedDate = document.getElementById('dateSelect').value;
@@ -287,6 +308,9 @@ async function loadProducts() {
 
     // 更新當前選擇的商品日期
     currentSelectedDate = selectedDate;
+
+    // 查詢當日外送數量
+    await checkDailyDeliveryCount(selectedDate);
 
     // 自動更新取貨日期為商品日期
     updatePickupDate(selectedDate);
@@ -1188,11 +1212,20 @@ function updateDeliveryOptions() {
 
     // 週一～週五 (1-5)：顯示新竹選項
     if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-        deliveryMethodSelect.innerHTML = `
+        let options = `
             <option value="">請選擇交易方式</option>
             <option value="新竹-面交 (19:00)">新竹 - 面交 (19:00)</option>
-            <option value="新竹-外送 (20:00~22:00, 須滿$300, 無法指定送達時間)">新竹 - 外送 (20:00~22:00, 須滿$300, 無法指定送達時間)</option>
         `;
+
+        // 檢查外送數量限制
+        if (dailyDeliveryCount < MAX_DAILY_DELIVERY) {
+            options += `<option value="新竹-外送 (20:00~22:00, 須滿$300, 無法指定送達時間)">新竹 - 外送 (20:00~22:00, 須滿$300, 無法指定送達時間)</option>`;
+        } else {
+            options += `<option value="" disabled>新竹 - 外送 (今日外送已滿)</option>`;
+        }
+
+        deliveryMethodSelect.innerHTML = options;
+
         // 自動更新地址選項為新竹
         populateCityOptions('新竹');
         // 重置地址欄位狀態（因為有面交選項）
@@ -1200,10 +1233,16 @@ function updateDeliveryOptions() {
     }
     // 週六、週日 (6, 0)：顯示臺中選項
     else if (dayOfWeek === 6 || dayOfWeek === 0) {
-        deliveryMethodSelect.innerHTML = `
-            <option value="">請選擇交易方式</option>
-            <option value="臺中-外送 (14:00~16:00, 須滿$300, 無法指定送達時間)">臺中 - 外送 (14:00~16:00, 須滿$300, 無法指定送達時間)</option>
-        `;
+        let options = `<option value="">請選擇交易方式</option>`;
+
+        // 檢查外送數量限制
+        if (dailyDeliveryCount < MAX_DAILY_DELIVERY) {
+            options += `<option value="臺中-外送 (14:00~16:00, 須滿$300, 無法指定送達時間)">臺中 - 外送 (14:00~16:00, 須滿$300, 無法指定送達時間)</option>`;
+        } else {
+            options += `<option value="" disabled>臺中 - 外送 (今日外送已滿)</option>`;
+        }
+
+        deliveryMethodSelect.innerHTML = options;
         // 自動更新地址選項為臺中
         populateCityOptions('臺中');
         // 設定地址為必填（只有外送選項）
