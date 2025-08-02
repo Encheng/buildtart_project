@@ -246,11 +246,31 @@ function setupMobileDropdown() {
 
     // 下拉選單功能
     if (dropdownToggle && navDropdown && dropdownMenu) {
+        // 檢測是否為觸控設備
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+        // 為觸控設備添加特殊處理
+        if (isTouchDevice) {
+            dropdownToggle.addEventListener('touchstart', function(e) {
+                if (window.innerWidth <= 768) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    navDropdown.classList.toggle('active');
+                    dropdownMenu.classList.toggle('show');
+                }
+            }, { passive: false });
+        }
+
         dropdownToggle.addEventListener('click', function(e) {
             e.preventDefault();
+            e.stopPropagation();
 
             // 在手機版本中處理下拉選單
             if (window.innerWidth <= 768) {
+                // 如果是觸控設備且已經處理過 touchstart，則跳過
+                if (isTouchDevice) {
+                    return;
+                }
                 navDropdown.classList.toggle('active');
                 dropdownMenu.classList.toggle('show');
             }

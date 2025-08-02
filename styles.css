@@ -1037,8 +1037,8 @@ footer {
     }
 }
 
-/* 桌面版本保持 hover 效果 */
-@media (min-width: 769px) {
+/* 桌面版本保持 hover 效果，但排除觸控設備 */
+@media (min-width: 769px) and (hover: hover) and (pointer: fine) {
     .nav-dropdown:hover .dropdown-menu {
         opacity: 1;
         visibility: visible;
@@ -1126,6 +1126,13 @@ footer {
     /* 手機版下拉選單 */
     .nav-dropdown {
         position: relative;
+        touch-action: manipulation;
+    }
+
+    .dropdown-toggle {
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+        touch-action: manipulation;
     }
 
     .dropdown-menu {
@@ -1140,7 +1147,7 @@ footer {
         max-height: 0;
         overflow: hidden;
         transform: translateY(-10px);
-        transition: all 0.3s ease;
+        transition: opacity 0.2s ease, visibility 0.2s ease, max-height 0.3s ease, transform 0.2s ease;
     }
 
     .dropdown-menu.show {
@@ -1160,11 +1167,13 @@ footer {
         color: #8B7335;
         font-size: 1rem;
         cursor: pointer;
-        transition: background-color 0.3s ease;
+        transition: background-color 0.2s ease;
         border: none;
         background: none;
         width: 100%;
         text-align: center;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
     }
 
     .dropdown-item:hover {
