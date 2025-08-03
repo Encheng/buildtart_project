@@ -188,7 +188,7 @@ h1, h2, h3, h4, h5, h6, p, div, span, a, button, input, select, textarea, label 
     padding: 0.5rem 1rem;
     color: #8B7355;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
     border: none;
     background: none;
     width: 100%;
@@ -197,7 +197,9 @@ h1, h2, h3, h4, h5, h6, p, div, span, a, button, input, select, textarea, label 
 }
 
 .dropdown-item:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(139, 115, 85, 0.15);
+    color: #6F5A42;
+    transform: translateX(2px);
 }
 
 .dropdown-item.loading {
@@ -1153,12 +1155,18 @@ footer {
     .dropdown-menu.show {
         opacity: 1;
         visibility: visible;
-        max-height: 400px;
+        max-height: 60vh;
         padding: 0.5rem 0;
         margin-top: 1rem;
         background-color: #F2ECE0;
         border: 1px solid #D4C4A8;
+        border-radius: 8px;
         transform: translateY(0);
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: #8B7355 #F2ECE0;
     }
 
     .dropdown-item {
@@ -1167,7 +1175,7 @@ footer {
         color: #8B7335;
         font-size: 1rem;
         cursor: pointer;
-        transition: background-color 0.2s ease;
+        transition: all 0.3s ease;
         border: none;
         background: none;
         width: 100%;
@@ -1177,7 +1185,35 @@ footer {
     }
 
     .dropdown-item:hover {
-        background-color: rgba(255, 255, 255, 0.1);
+        background-color: rgba(139, 115, 85, 0.2);
+        color: #6F5A42;
+        transform: scale(1.02);
+    }
+
+    .dropdown-item:active {
+        background-color: rgba(139, 115, 85, 0.3);
+        transform: scale(0.98);
+    }
+
+    /* 自定義滾動條樣式 */
+    .dropdown-menu.show::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .dropdown-menu.show::-webkit-scrollbar-track {
+        background: rgba(139, 115, 85, 0.1);
+        border-radius: 3px;
+    }
+
+    .dropdown-menu.show::-webkit-scrollbar-thumb {
+        background: #8B7355;
+        border-radius: 3px;
+        opacity: 0.7;
+    }
+
+    .dropdown-menu.show::-webkit-scrollbar-thumb:hover {
+        background: #6F5A42;
+        opacity: 1;
     }
 
     .dropdown-toggle {
