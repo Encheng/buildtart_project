@@ -40,7 +40,7 @@ function initializePage() {
     // 移除原本的表單提交事件，改用新的訂單處理
     document.getElementById('orderForm').addEventListener('submit', handleOrderSubmit);
 
-    // 添加交易方式變更監聽器
+    // 添加取貨方式變更監聽器
     setupDeliveryMethodListener();
 
     // 初始化浮動購物車
@@ -89,7 +89,7 @@ function setupInstagramLink() {
     }
 }
 
-// 設定交易方式變更監聽器
+// 設定取貨方式變更監聽器
 function setupDeliveryMethodListener() {
     const deliveryMethodSelect = document.getElementById('deliveryMethod');
     if (deliveryMethodSelect) {
@@ -102,7 +102,7 @@ function setupDeliveryMethodListener() {
             } else if (selectedMethod.includes('臺中')) {
                 populateCityOptions('臺中');
             } else if (selectedMethod === '') {
-                // 如果沒有選擇交易方式，根據當前日期決定地址選項
+                // 如果沒有選擇取貨方式，根據當前日期決定地址選項
                 const pickupDateInput = document.getElementById('pickupDate');
                 if (pickupDateInput.value) {
                     const selectedDate = new Date(pickupDateInput.value);
@@ -117,7 +117,7 @@ function setupDeliveryMethodListener() {
                 }
             }
 
-            // 根據交易方式設定地址欄位是否必填
+            // 根據取貨方式設定地址欄位是否必填
             updateAddressRequiredStatus(selectedMethod);
         });
     }
@@ -1062,7 +1062,7 @@ function handleOrderSubmit(e) {
     }
 
     if (!deliveryMethod) {
-        alert('請選擇交易方式');
+        alert('請選擇取貨方式');
         return;
     }
 
@@ -1141,7 +1141,7 @@ function redirectToGoogleForm(orderData) {
         'entry.1546092137': orderData.customerInstagram,    // IG帳號欄位
         'entry.1047149694': orderData.pickupDate,           // 取貨日期欄位
         'entry.1069013189': orderData.paymentMethod,        // 付款方式欄位
-        'entry.1645634297': orderData.deliveryMethod,       // 交易方式欄位
+        'entry.1645634297': orderData.deliveryMethod,       // 取貨方式欄位
         'entry.82924036': orderData.customerAddress,      // 配送地址欄位
         'entry.1969932251': orderData.orderSummary,         // 訂單內容欄位
         'entry.247157095': orderData.totalAmount,          // 總金額欄位
@@ -1221,7 +1221,7 @@ function updateCurrentYear() {
     }
 }
 
-// 更新交易方式選項
+// 更新取貨方式選項
 function updateDeliveryOptions() {
     const pickupDateInput = document.getElementById('pickupDate');
     const deliveryMethodSelect = document.getElementById('deliveryMethod');
@@ -1242,7 +1242,7 @@ function updateDeliveryOptions() {
     // 週一～週五 (1-5)：顯示新竹選項
     if (dayOfWeek >= 1 && dayOfWeek <= 5) {
         let options = `
-            <option value="">請選擇交易方式</option>
+            <option value="">請選擇取貨方式</option>
             <option value="新竹-面交 (19:00)">新竹 - 面交 (19:00)</option>
         `;
 
@@ -1262,7 +1262,7 @@ function updateDeliveryOptions() {
     }
     // 週六、週日 (6, 0)：顯示臺中選項
     else if (dayOfWeek === 6 || dayOfWeek === 0) {
-        let options = `<option value="">請選擇交易方式</option>`;
+        let options = `<option value="">請選擇取貨方式</option>`;
 
         // 檢查外送數量限制
         if (dailyDeliveryCount < MAX_DAILY_DELIVERY) {
