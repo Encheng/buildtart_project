@@ -80,6 +80,14 @@
                             <input type="date" id="pickupDate" name="pickupDate" required readonly disabled onchange="updateDeliveryOptions()">
                         </div>
                         <div class="form-group">
+                            <label for="paymentMethod">付款方式 *</label>
+                            <select id="paymentMethod" name="paymentMethod" required>
+                                <option value="">請選擇付款方式</option>
+                                <option value="現金">現金</option>
+                                <option value="Linepay">Linepay</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label for="deliveryMethod">交易方式 *</label>
                             <select id="deliveryMethod" name="deliveryMethod" required>
                                 <option value="">請先選擇取貨日期</option>

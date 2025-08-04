@@ -1055,6 +1055,12 @@ function handleOrderSubmit(e) {
         return;
     }
 
+    const paymentMethod = document.getElementById('paymentMethod').value;
+    if (!paymentMethod) {
+        alert('請選擇付款方式');
+        return;
+    }
+
     if (!deliveryMethod) {
         alert('請選擇交易方式');
         return;
@@ -1094,6 +1100,7 @@ function handleOrderSubmit(e) {
         customerPhone,
         customerInstagram,
         pickupDate,
+        paymentMethod,
         customerAddress,
         deliveryMethod,
         orderSummary,
@@ -1105,7 +1112,8 @@ function handleOrderSubmit(e) {
 // 生成訂單摘要
 function generateOrderSummary() {
     const selectedDate = document.getElementById('dateSelect').value;
-    let summary = `出貨日期：${selectedDate}\n訂單內容：\n`;
+    const paymentMethod = document.getElementById('paymentMethod').value;
+    let summary = `出貨日期：${selectedDate}\n付款方式：${paymentMethod}\n訂單內容：\n`;
 
     orderItems.forEach(item => {
         // 包含產品ID和日期資訊，方便Excel公式解析
@@ -1132,6 +1140,7 @@ function redirectToGoogleForm(orderData) {
         'entry.1520001722': orderData.customerPhone,        // 電話欄位
         'entry.1546092137': orderData.customerInstagram,    // IG帳號欄位
         'entry.1047149694': orderData.pickupDate,           // 取貨日期欄位
+        'entry.1069013189': orderData.paymentMethod,        // 付款方式欄位
         'entry.1645634297': orderData.deliveryMethod,       // 交易方式欄位
         'entry.82924036': orderData.customerAddress,      // 配送地址欄位
         'entry.1969932251': orderData.orderSummary,         // 訂單內容欄位
