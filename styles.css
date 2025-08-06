@@ -633,6 +633,8 @@ h1, h2, h3, h4, h5, h6, p, div, span, a, button, input, select, textarea, label 
     margin-bottom: 0.5rem;
     font-weight: bold;
     color: #8B7355;
+    display: flex;
+    align-items: center;
 }
 
 .form-group input,
@@ -1565,7 +1567,6 @@ footer {
     width: 14px;
     height: 14px;
     margin: 0;
-    margin-top: 2px;
     accent-color: #8B7355;
     cursor: pointer;
     flex-shrink: 0;
@@ -1585,6 +1586,11 @@ footer {
 .ig-link:hover {
     color: #6F5A42;
     text-decoration: underline;
+}
+
+.warning-text {
+    color: #dc3545;
+    font-weight: 600;
 }
 
 /* 手機版條款確認樣式調整 */

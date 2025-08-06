@@ -512,7 +512,9 @@ function displayProducts(products) {
         productsContainer.innerHTML = `
             <div class="no-products-message">
                 <h3>注意事項</h3>
-                <p>請選擇右上角出貨日期</p>
+                <p>請選擇右上角出貨日期，如需下午茶訂購可私訊
+                <a href="https://www.instagram.com/buildtart.studio/" target="_blank" class="ig-link" id="igLink">@buildtart.studio</a>
+                </p>
             </div>`;
         return;
     }
