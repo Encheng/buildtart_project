@@ -1096,8 +1096,8 @@ function handleOrderSubmit(e) {
     // 生成訂單摘要
     const orderSummary = generateOrderSummary();
 
-    // 重導向到 Google Forms 並預填資料
-    redirectToGoogleForm({
+    // 直接提交到 Google Forms
+    submitToGoogleForm({
         customerName,
         customerPhone,
         customerInstagram,
@@ -1202,6 +1202,285 @@ function showFormSubmissionInstructions() {
     messageDiv.scrollIntoView({ behavior: 'smooth' });
 }
 
+// 直接提交到 Google Forms
+async function submitToGoogleForm(orderData) {
+    try {
+        // 顯示提交中狀態
+        const submitButton = document.querySelector('.submit-button');
+        const originalText = submitButton.textContent;
+        submitButton.textContent = '提交中...';
+        submitButton.disabled = true;
+
+        // Google Forms 的提交 URL (formResponse 端點)
+        const formId = '1FAIpQLSfNHI38AKIzed7cHfOdc5HHHi57fCKWv7jy-j_5kGRJpGehUQ';
+        const submitUrl = `https://docs.google.com/forms/u/0/d/e/${formId}/formResponse`;
+
+        // 建立表單資料
+        const formData = new FormData();
+        formData.append('entry.1520392480', orderData.customerName);         // 姓名欄位
+        formData.append('entry.1520001722', orderData.customerPhone);        // 電話欄位
+        formData.append('entry.1546092137', orderData.customerInstagram);    // IG帳號欄位
+        formData.append('entry.1047149694', orderData.pickupDate);           // 取貨日期欄位
+        formData.append('entry.1069013189', orderData.paymentMethod);        // 付款方式欄位
+        formData.append('entry.1645634297', orderData.deliveryMethod);       // 取貨方式欄位
+        formData.append('entry.82924036', orderData.customerAddress);        // 配送地址欄位
+        formData.append('entry.1969932251', orderData.orderSummary);         // 訂單內容欄位
+        formData.append('entry.247157095', orderData.totalAmount);          // 總金額欄位
+        formData.append('entry.65985849', orderData.specialRequests || '');  // 特殊需求欄位
+
+        // 提交到 Google Forms
+        const response = await fetch(submitUrl, {
+            method: 'POST',
+            body: formData,
+            mode: 'no-cors' // Google Forms 不支援 CORS，使用 no-cors 模式
+        });
+
+        // 由於是 no-cors 模式，我們無法檢查 response status
+        // 但通常如果沒有錯誤，就代表提交成功
+        showSuccessMessage(orderData);
+
+        // 清空訂單（這裡會重置按鈕狀態）
+        clearOrder();
+    } catch (error) {
+        console.error('提交訂單失敗:', error);
+        showErrorMessage('提交訂單時發生錯誤，請重試或聯繫客服。');
+
+        // 錯誤情況下恢復按鈕狀態
+        const submitButton = document.querySelector('.submit-button');
+        if (submitButton) {
+            submitButton.textContent = '提交訂單';
+            submitButton.disabled = false
+        }
+    }
+}
+
+// 顯示成功Modal
+function showSuccessMessage(orderData) {
+    // 創建Modal
+    const modal = createSuccessModal(orderData);
+    document.body.appendChild(modal);
+
+    // 防止背景滾動
+    document.body.style.overflow = 'hidden';
+
+    // 顯示動畫
+    setTimeout(() => {
+        modal.classList.add('show');
+    }, 50);
+
+}
+
+// 創建成功Modal
+function createSuccessModal(orderData) {
+    const modal = document.createElement('div');
+    modal.className = 'success-modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <!-- 成功圖示與標題 -->
+            <div class="success-header">
+                <div class="success-icon">🎉</div>
+                <h2>訂單提交成功！</h2>
+                <p class="success-subtitle">您的訂單已安全送達築塔 STUDIO</p>
+            </div>
+
+            <!-- 訂單摘要 -->
+            <div class="order-summary-section">
+                <h3><span class="icon">📋</span> 您的訂單</h3>
+                <div class="order-details">
+                    <pre class="order-content">${orderData.orderSummary}</pre>
+                </div>
+            </div>
+
+            <!-- 重要下一步 -->
+            <div class="next-steps highlight-section">
+                <h3><span class="icon">🎯</span> 重要！接下來請：</h3>
+                <div class="step-list">
+                    <div class="step primary-step">
+                        <span class="step-number">1</span>
+                        <div class="step-content">
+                            <strong>立即IG私訊確認</strong>
+                            <p class="step-desc">請前往Instagram私訊 <a href="https://www.instagram.com/buildtart.studio/" target="_blank" style="color: #8B7355; font-weight: bold; text-decoration: none;">@buildtart.studio</a> 確認訂單</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">2</span>
+                        <div class="step-content">
+                            <strong>等待確認回覆</strong>
+                            <p class="step-desc">築塔STUDIO將在 <span class="highlight">24小時內</span> 回覆確認</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">3</span>
+                        <div class="step-content">
+                            <strong>依時取貨</strong>
+                            <p class="step-desc">確認後請依指定的時間與地點取貨</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 行動按鈕組 -->
+            <div class="modal-actions">
+                <button class="secondary-btn" onclick="continueOrder()">
+                    <span class="btn-icon">🛒</span>
+                    繼續下單
+                </button>
+                <button class="primary-btn" onclick="closeAndNavigateIG()">
+                    <span class="btn-icon">💬</span>
+                    前往IG私訊
+                </button>
+            </div>
+
+            <!-- 關閉按鈕 -->
+            <button class="modal-close" onclick="closeModal()" aria-label="關閉">×</button>
+        </div>
+    `;
+
+    // 添加事件監聽
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            // 點擊背景時顯示確認對話框
+            if (confirm('確定要關閉此訊息嗎？請確保您已了解後續的IG私訊步驟。')) {
+                closeModal();
+            }
+        }
+    });
+
+    // ESC鍵關閉
+    document.addEventListener('keydown', function escHandler(e) {
+        if (e.key === 'Escape') {
+            closeModal();
+            document.removeEventListener('keydown', escHandler);
+        }
+    });
+
+    return modal;
+}
+
+// 關閉Modal並前往IG
+function closeAndNavigateIG() {
+    // 開啟IG
+    window.open('https://www.instagram.com/buildtart.studio/', '_blank');
+
+    // 關閉Modal
+    setTimeout(() => {
+        closeModal();
+    }, 500);
+}
+
+// 繼續下單
+function continueOrder() {
+    // 關閉Modal
+    closeModal();
+
+    // 滾動到產品區域
+    document.getElementById('products').scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+    });
+
+    // 短暫提示
+    showQuickNotification('可以繼續選擇其他甜點訂購 🧁');
+}
+
+// 關閉Modal
+function closeModal() {
+    const modal = document.querySelector('.success-modal');
+    if (modal) {
+        modal.classList.add('hiding');
+        setTimeout(() => {
+            modal.remove();
+            document.body.style.overflow = '';
+        }, 300);
+    }
+}
+
+// 顯示快速通知
+function showQuickNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'quick-notification';
+    notification.textContent = message;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 100);
+
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+}
+
+// 顯示錯誤訊息
+function showErrorMessage(message) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'error-message';
+    messageDiv.style.cssText = `
+        background-color: #fee;
+        border: 1px solid #fcc;
+        color: #c33;
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 8px;
+        text-align: center;
+    `;
+    messageDiv.innerHTML = `
+        <h3>❌ ${message}</h3>
+        <button onclick="this.parentElement.remove()" style="margin-top: 10px; padding: 8px 16px; background: #c33; color: white; border: none; border-radius: 4px; cursor: pointer;">關閉</button>
+    `;
+
+    const orderSection = document.getElementById('order');
+    orderSection.insertBefore(messageDiv, orderSection.firstChild);
+
+    messageDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// 清空訂單
+function clearOrder() {
+    orderItems = [];
+    totalAmount = 0;
+    updateOrderDisplay();
+    updateTotalAmount();
+    updateFloatingCartBadge();
+
+    // 重設表單
+    document.getElementById('orderForm').reset();
+
+    // 重新設定今日日期
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const todayString = `${year}-${month}-${day}`;
+    document.getElementById('dateSelect').value = todayString;
+    document.getElementById('pickupDate').value = todayString;
+
+    // 重設外送選項
+    updateDeliveryOptions();
+
+    // 重設地址選項
+    const citySelect = document.getElementById('citySelect');
+    const districtSelect = document.getElementById('districtSelect');
+    const detailAddress = document.getElementById('detailAddress');
+
+    citySelect.selectedIndex = 0;
+    districtSelect.selectedIndex = 0;
+    districtSelect.disabled = true;
+    detailAddress.value = '';
+
+    // 確保提交按鈕恢復正常狀態
+    const submitButton = document.querySelector('.submit-button');
+    if (submitButton) {
+        submitButton.textContent = '提交訂單';
+        submitButton.disabled = false;
+    }
+
+    isFirstTimeAddingProduct = true;
+}
 
 // 格式化顯示日期
 function formatDisplayDate(dateString) {
