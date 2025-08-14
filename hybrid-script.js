@@ -302,35 +302,16 @@ function setupMobileDropdown() {
     }
 }
 
-// 查詢當日外送數量
-async function checkDailyDeliveryCount(date) {
-    try {
-        const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=getDeliveryCount&date=${date}`);
-        const data = await response.json();
+// 已移除獨立的 checkDailyDeliveryCount 函數
+// 現在外送數量查詢已合併到 loadProducts() 函數中
 
-        if (data.success) {
-            dailyDeliveryCount = data.data.deliveryCount || 0;
-            console.log(`當日外送數量: ${dailyDeliveryCount}/${MAX_DAILY_DELIVERY}`);
-        } else {
-            console.error('查詢外送數量失敗:', data.message);
-            dailyDeliveryCount = 0; // 發生錯誤時預設為0，不限制外送
-        }
-    } catch (error) {
-        console.error('查詢外送數量時發生網路錯誤:', error);
-        dailyDeliveryCount = 0; // 發生錯誤時預設為0，不限制外送
-    }
-}
-
-// 載入產品數據
+// 載入產品數據（優化版 - 合併API調用）
 async function loadProducts() {
     const selectedDate = document.getElementById('dateSelect').value;
     const productsContainer = document.getElementById('productsContainer');
 
     // 更新當前選擇的商品日期
     currentSelectedDate = selectedDate;
-
-    // 查詢當日外送數量
-    await checkDailyDeliveryCount(selectedDate);
 
     // 自動更新取貨日期為商品日期
     updatePickupDate(selectedDate);
@@ -353,11 +334,15 @@ async function loadProducts() {
             </div>
         `;
 
-        const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=getProducts&date=${selectedDate}`);
+        // 使用合併的API同時獲取產品和外送數量
+        const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=getProductsWithDeliveryInfo&date=${selectedDate}`);
         const data = await response.json();
 
         if (data.success) {
-            products = data.products || [];
+            products = data.data.products || [];
+            dailyDeliveryCount = data.data.deliveryCount || 0;
+            console.log(`當日外送數量: ${dailyDeliveryCount}/${data.data.maxDelivery || MAX_DAILY_DELIVERY}`);
+
             displayProducts(products);
             // 清空跨日期的訂單項目
             clearCrossDayOrderItems();
@@ -601,11 +586,11 @@ function displayProducts(products) {
                     <h3 class="product-name">${escapeHtml(group.name)}</h3>
                     <p class="product-description">${escapeHtml(group.description)}</p>
                     ${priceDisplay}
-                    ${stockDisplay}
                     ${typeSelector}
                     ${addToOrderButton}
                 </div>
             </div>`;
+        // TODO: 剩餘數量目前暫時不顯示：${stockDisplay}
     });
 
     productsContainer.innerHTML = html;
