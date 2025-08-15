@@ -1593,6 +1593,24 @@ footer {
     font-weight: 600;
 }
 
+/* 重新載入按鈕樣式 */
+.retry-button {
+    background-color: #8B7355;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: DFKai-sb, '標楷體', 'BiauKai', 'serif';
+    font-size: 1rem;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.retry-button:hover {
+    background-color: #6d5a3f;
+}
+
 /* 成功Modal樣式 */
 .success-modal {
     position: fixed;

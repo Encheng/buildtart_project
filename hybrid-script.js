@@ -14,6 +14,15 @@ let isFirstTimeAddingProduct = true; // 追蹤是否為第一次加入商品
 let dailyDeliveryCount = 0; // 當日外送訂單數量
 const MAX_DAILY_DELIVERY = 6; // 每日最大外送次數
 
+// 新增：全域資料快取（不包含客戶個人資料）
+let globalData = {
+    productData: null,
+    dailyDeliveryStats: null, // 只儲存統計數據，不儲存個人資料
+    maxDelivery: 6,
+    loaded: false,
+    timestamp: null
+};
+
 // DOM 載入完成後初始化
 document.addEventListener('DOMContentLoaded', function() {
     initializePage();
@@ -22,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // 初始化頁面
-function initializePage() {
+async function initializePage() {
     // 修正時區問題，使用本地時間
     const today = new Date();
     const year = today.getFullYear();
@@ -32,8 +41,12 @@ function initializePage() {
 
     document.getElementById('dateSelect').value = todayString;
 
-    loadProducts();
-    loadAvailableDates();
+    // 首先載入所有完整資料（只調用一次API）
+    await loadAllCompleteData();
+
+    // 然後基於資料初始化所有功能
+    initializeWithData(todayString);
+
     setupScrolling();
     setupMobileDropdown();
 
@@ -302,21 +315,124 @@ function setupMobileDropdown() {
     }
 }
 
-// 已移除獨立的 checkDailyDeliveryCount 函數
-// 現在外送數量查詢已合併到 loadProducts() 函數中
+/**
+ * 載入所有完整資料 - 只在初始化時調用一次API
+ */
+async function loadAllCompleteData() {
+    if (globalData.loaded) {
+        console.log('資料已載入，跳過重複載入');
+        return;
+    }
 
-// 載入產品數據（優化版 - 合併API調用）
-async function loadProducts() {
-    const selectedDate = document.getElementById('dateSelect').value;
+    // 顯示初始載入動畫
+    const productsContainer = document.getElementById('productsContainer');
+    productsContainer.innerHTML = `
+        <div class="loading-container">
+            <div class="loading-animation">
+                <div class="cake-loader">
+                    <div class="cake-layer layer-1"></div>
+                    <div class="cake-layer layer-2"></div>
+                    <div class="cake-layer layer-3"></div>
+                    <div class="cake-topping">🍓</div>
+                </div>
+                <div class="loading-text">圖片準備中...</div>
+                <div class="loading-progress">
+                    <div class="progress-bar"></div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    try {
+        console.log('🚀 開始載入所有完整資料...');
+
+        const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=getAllCompleteData`);
+        const data = await response.json();
+
+        if (data.success) {
+            globalData.productData = data.data.productData;
+            globalData.dailyDeliveryStats = data.data.dailyDeliveryStats; // 只儲存統計數據
+            globalData.maxDelivery = data.data.maxDelivery;
+            globalData.loaded = true;
+            globalData.timestamp = data.data.timestamp;
+
+            console.log('✅ 完整資料載入成功！');
+            console.log(`📦 產品資料: ${globalData.productData.length} 行`);
+            console.log(`📊 外送統計: ${Object.keys(globalData.dailyDeliveryStats).length} 個日期`);
+        } else {
+            throw new Error(data.message || '載入完整資料失敗');
+        }
+    } catch (error) {
+        console.error('❌ 載入完整資料時發生錯誤:', error);
+
+        // 顯示載入錯誤
+        productsContainer.innerHTML = `
+            <div class="error-message">
+                <h3>載入失敗</h3>
+                <p>暫時無法載入商品資料，請重新整理頁面。</p>
+                <button onclick="window.location.reload()" class="retry-button">重新載入</button>
+            </div>`;
+
+        throw error;
+    }
+}
+
+/**
+ * 基於已載入的資料初始化頁面
+ */
+function initializeWithData(initialDate) {
+    // 1. 載入可用日期到導航選單
+    const availableDates = extractAvailableDatesFromData();
+    populateNavDateSelect(availableDates);
+
+    // 2. 載入初始日期的產品
+    loadProductsFromData(initialDate);
+}
+
+/**
+ * 從全域資料中提取可用日期
+ */
+function extractAvailableDatesFromData() {
+    const dates = new Set();
+
+    if (globalData.productData && globalData.productData.length > 1) {
+        const headers = globalData.productData[0];
+        const dateIndex = headers.indexOf('日期');
+        const statusIndex = headers.indexOf('狀態');
+
+        if (dateIndex !== -1) {
+            for (let i = 1; i < globalData.productData.length; i++) {
+                const row = globalData.productData[i];
+                if (!row || row.length === 0 || !row[dateIndex]) continue;
+
+                // 只處理狀態為啟用的產品
+                if (statusIndex !== -1 && row[statusIndex] !== '啟用') continue;
+
+                const formattedDate = formatDateForComparison(row[dateIndex]);
+                if (formattedDate) {
+                    dates.add(formattedDate);
+                }
+            }
+        }
+    }
+
+    return Array.from(dates).sort();
+}
+
+/**
+ * 從全域資料中載入指定日期的產品（不調用API）
+ */
+function loadProductsFromData(targetDate) {
     const productsContainer = document.getElementById('productsContainer');
 
     // 更新當前選擇的商品日期
-    currentSelectedDate = selectedDate;
+    currentSelectedDate = targetDate;
 
     // 自動更新取貨日期為商品日期
-    updatePickupDate(selectedDate);
+    updatePickupDate(targetDate);
 
     try {
+        // 顯示載入動畫
         productsContainer.innerHTML = `
             <div class="loading-container">
                 <div class="loading-animation">
@@ -326,7 +442,7 @@ async function loadProducts() {
                         <div class="cake-layer layer-3"></div>
                         <div class="cake-topping">🍓</div>
                     </div>
-                    <div class="loading-text">圖片準備中...</div>
+                    <div class="loading-text">準備商品資料中...</div>
                     <div class="loading-progress">
                         <div class="progress-bar"></div>
                     </div>
@@ -334,39 +450,288 @@ async function loadProducts() {
             </div>
         `;
 
-        // 使用合併的API同時獲取產品和外送數量
-        const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=getProductsWithDeliveryInfo&date=${selectedDate}`);
-        const data = await response.json();
+        // 保留載入動畫的時間，提供更好的用戶體驗
+        setTimeout(() => {
+            const processedData = processDataForTargetDate(targetDate);
 
-        if (data.success) {
-            products = data.data.products || [];
-            dailyDeliveryCount = data.data.deliveryCount || 0;
-            console.log(`當日外送數量: ${dailyDeliveryCount}/${data.data.maxDelivery || MAX_DAILY_DELIVERY}`);
+            products = processedData.products || [];
+            dailyDeliveryCount = processedData.deliveryCount || 0;
+            console.log(`當日外送數量: ${dailyDeliveryCount}/${processedData.maxDelivery || MAX_DAILY_DELIVERY}`);
 
             displayProducts(products);
             // 清空跨日期的訂單項目
             clearCrossDayOrderItems();
-        } else {
-            throw new Error(data.message || '載入產品資料失敗');
-        }
+        }, 800); // 保留載入動畫，讓用戶感受到系統在工作
+
     } catch (error) {
-        console.error('載入商品時發生錯誤:', error);
+        console.error('處理產品資料時發生錯誤:', error);
         productsContainer.innerHTML = `
             <div class="error-message">
-                <h3>載入失敗</h3>
-                <p>暫時無法載入商品資料，請稍後再試。</p>
+                <h3>處理失敗</h3>
+                <p>暫時無法處理商品資料，請重新整理頁面。</p>
             </div>`;
     }
 }
 
-// 載入可用日期
+/**
+ * 處理指定日期的資料（從全域資料中）
+ */
+function processDataForTargetDate(targetDate) {
+    // 1. 處理產品資料
+    const products = [];
+    if (globalData.productData && globalData.productData.length > 1) {
+        const headers = globalData.productData[0];
+
+        // 建立欄位索引映射
+        const indexes = {
+            date: headers.indexOf('日期'),
+            id: headers.indexOf('產品ID'),
+            name: headers.indexOf('產品名稱'),
+            type: headers.indexOf('類型'),
+            description: headers.indexOf('描述'),
+            price: headers.indexOf('價格'),
+            total: headers.indexOf('總數量'),
+            remaining: headers.indexOf('剩餘數量'),
+            status: headers.indexOf('狀態'),
+            image: headers.indexOf('圖片連結')
+        };
+
+        // 格式化目標日期
+        const formattedTargetDate = formatDateForComparison(targetDate);
+
+        // 篩選指定日期且狀態為啟用的產品
+        for (let i = 1; i < globalData.productData.length; i++) {
+            const row = globalData.productData[i];
+
+            if (!row || row.length === 0 || !row[indexes.date]) continue;
+
+            const rowDate = formatDateForComparison(row[indexes.date]);
+
+            if (rowDate === formattedTargetDate && row[indexes.status] === '啟用') {
+                products.push({
+                    id: row[indexes.id],
+                    name: row[indexes.name],
+                    type: row[indexes.type] || '其他',
+                    description: row[indexes.description],
+                    price: row[indexes.price],
+                    total: row[indexes.total],
+                    remaining: row[indexes.remaining],
+                    date: rowDate,
+                    imageUrl: indexes.image !== -1 ? row[indexes.image] : ''
+                });
+            }
+        }
+    }
+
+    // 2. 從後端計算好的統計資料中取得外送數量（保護客戶隱私）
+    const formattedTargetDate = formatDateForComparison(targetDate);
+    const deliveryCount = globalData.dailyDeliveryStats[formattedTargetDate] || 0;
+
+    return {
+        products: products,
+        deliveryCount: deliveryCount,
+        maxDelivery: globalData.maxDelivery || 6
+    };
+}
+
+/**
+ * 前端資料處理函數 - 將API返回的原始資料處理成需要的格式（舊版保留）
+ */
+function processRawDataForDate(rawData, targetDate) {
+    const { productData, formResponseData, maxDelivery } = rawData;
+
+    // 1. 處理產品資料
+    const products = [];
+    if (productData && productData.length > 1) {
+        const headers = productData[0];
+
+        // 建立欄位索引映射
+        const indexes = {
+            date: headers.indexOf('日期'),
+            id: headers.indexOf('產品ID'),
+            name: headers.indexOf('產品名稱'),
+            type: headers.indexOf('類型'),
+            description: headers.indexOf('描述'),
+            price: headers.indexOf('價格'),
+            total: headers.indexOf('總數量'),
+            remaining: headers.indexOf('剩餘數量'),
+            status: headers.indexOf('狀態'),
+            image: headers.indexOf('圖片連結')
+        };
+
+        // 格式化目標日期
+        const formattedTargetDate = formatDateForComparison(targetDate);
+
+        // 篩選指定日期且狀態為啟用的產品
+        for (let i = 1; i < productData.length; i++) {
+            const row = productData[i];
+
+            if (!row || row.length === 0 || !row[indexes.date]) continue;
+
+            const rowDate = formatDateForComparison(row[indexes.date]);
+
+            if (rowDate === formattedTargetDate && row[indexes.status] === '啟用') {
+                products.push({
+                    id: row[indexes.id],
+                    name: row[indexes.name],
+                    type: row[indexes.type] || '其他',
+                    description: row[indexes.description],
+                    price: row[indexes.price],
+                    total: row[indexes.total],
+                    remaining: row[indexes.remaining],
+                    date: rowDate,
+                    imageUrl: indexes.image !== -1 ? row[indexes.image] : ''
+                });
+            }
+        }
+    }
+
+    // 2. 計算外送數量
+    let deliveryCount = 0;
+    if (formResponseData && formResponseData.length > 1) {
+        const headers = formResponseData[0];
+
+        // 尋找相關欄位的索引
+        let pickupDateIndex = -1;
+        let deliveryMethodIndex = -1;
+
+        for (let i = 0; i < headers.length; i++) {
+            const header = headers[i].toString().toLowerCase();
+            if (header.includes('取貨日期') || header.includes('pickup') || header.includes('日期')) {
+                pickupDateIndex = i;
+            }
+            if (header.includes('取貨方式') || header.includes('delivery') || header.includes('交易方式')) {
+                deliveryMethodIndex = i;
+            }
+        }
+
+        if (pickupDateIndex !== -1 && deliveryMethodIndex !== -1) {
+            const formattedTargetDate = formatDateForComparison(targetDate);
+
+            for (let i = 1; i < formResponseData.length; i++) {
+                const row = formResponseData[i];
+                if (!row || row.length === 0) continue;
+
+                const pickupDate = row[pickupDateIndex];
+                const deliveryMethod = row[deliveryMethodIndex];
+
+                if (pickupDate && deliveryMethod) {
+                    const formattedPickupDate = formatDateForComparison(pickupDate);
+                    if (formattedPickupDate === formattedTargetDate &&
+                        deliveryMethod.toString().includes('外送')) {
+                        deliveryCount++;
+                    }
+                }
+            }
+        }
+    }
+
+    // 3. 提取所有可用日期
+    const availableDates = new Set();
+    if (productData && productData.length > 1) {
+        const headers = productData[0];
+        const dateIndex = headers.indexOf('日期');
+        const statusIndex = headers.indexOf('狀態');
+
+        if (dateIndex !== -1) {
+            for (let i = 1; i < productData.length; i++) {
+                const row = productData[i];
+                if (!row || row.length === 0 || !row[dateIndex]) continue;
+
+                // 只處理狀態為啟用的產品
+                if (statusIndex !== -1 && row[statusIndex] !== '啟用') continue;
+
+                const formattedDate = formatDateForComparison(row[dateIndex]);
+                if (formattedDate) {
+                    availableDates.add(formattedDate);
+                }
+            }
+        }
+    }
+
+    return {
+        products: products,
+        deliveryCount: deliveryCount,
+        maxDelivery: maxDelivery || 6,
+        availableDates: Array.from(availableDates).sort()
+    };
+}
+
+/**
+ * 前端日期格式化函數（與後端保持一致）
+ */
+function formatDateForComparison(date) {
+    if (!date) return '';
+
+    // 字符串日期處理
+    if (typeof date === 'string') {
+        // 處理 "2025/1/14" 格式
+        if (date.includes('/')) {
+            const parts = date.split('/');
+            if (parts.length === 3) {
+                const year = parts[0];
+                const month = parts[1].padStart(2, '0');
+                const day = parts[2].padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+        }
+
+        // 處理 ISO 格式 "2025-01-14"
+        if (date.match(/^\d{4}-\d{1,2}-\d{1,2}$/)) {
+            const parts = date.split('-');
+            const year = parts[0];
+            const month = parts[1].padStart(2, '0');
+            const day = parts[2].padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+    }
+
+    // Date 對象處理
+    let dateObj;
+    if (date instanceof Date) {
+        dateObj = date;
+    } else if (typeof date === 'number') {
+        // Google Sheets Excel 序列號
+        dateObj = new Date((date - 25569) * 86400 * 1000);
+    } else {
+        dateObj = new Date(String(date));
+    }
+
+    // 驗證並格式化
+    if (dateObj && !isNaN(dateObj.getTime())) {
+        const year = dateObj.getFullYear();
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const day = String(dateObj.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    return '';
+}
+
+// 載入產品數據（終極優化版 - 無API調用，使用全域資料）
+function loadProducts() {
+    const selectedDate = document.getElementById('dateSelect').value;
+
+    if (!globalData.loaded) {
+        console.error('全域資料尚未載入，無法切換產品');
+        return;
+    }
+
+    // 直接使用已載入的全域資料，無需API調用
+    loadProductsFromData(selectedDate);
+}
+
+// 載入可用日期（備用函數 - 已整合至loadProducts中）
 async function loadAvailableDates() {
+    // 此函數已不再使用，可用日期現在通過 loadProducts() 一次性載入
+    console.warn('loadAvailableDates() 已棄用，請使用 loadProducts() 獲取完整資料');
+
+    // 如果需要獨立載入可用日期，仍保留此功能
     try {
         const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=getAvailableDates`);
         const data = await response.json();
 
         if (data.success) {
-            // 根據 createResponse 函數的邏輯，陣列會被設定為 products 屬性
             const dates = data.products || data.data || [];
             populateNavDateSelect(dates);
         } else {
