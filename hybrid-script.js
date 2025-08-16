@@ -1721,6 +1721,9 @@ function closeAndNavigateIG() {
 function continueOrder() {
     // 關閉Modal
     closeModal();
+    
+    // 完全重置訂單狀態
+    clearOrder();
 
     // 滾動到產品區域
     document.getElementById('products').scrollIntoView({
