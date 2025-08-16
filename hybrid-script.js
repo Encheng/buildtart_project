@@ -1018,7 +1018,8 @@ function getStockText(remaining, total) {
 function updateProductPrice(groupId) {
     const typeSelect = document.getElementById(`type-${groupId}`);
     const priceDisplay = document.getElementById(`price-${groupId}`);
-    const stockDisplay = document.getElementById(`stock-${groupId}`);
+    // const stockDisplay = document.getElementById(`stock-${groupId}`);
+    // TODO: 剩餘數量目前暫時不顯示：${stockDisplay}
     const addButton = document.getElementById(`btn-${groupId}`);
 
     if (typeSelect.value) {
@@ -1030,10 +1031,11 @@ function updateProductPrice(groupId) {
         priceDisplay.textContent = `NT$ ${price}`;
 
         // 更新庫存顯示
-        const stockClass = getStockClass(remaining, total);
-        const stockText = getStockText(remaining, total);
-        stockDisplay.textContent = stockText;
-        stockDisplay.className = `product-stock ${stockClass}`;
+        // const stockClass = getStockClass(remaining, total);
+        // const stockText = getStockText(remaining, total);
+        // stockDisplay.textContent = stockText;
+        // stockDisplay.className = `product-stock ${stockClass}`;
+        // TODO: 剩餘數量目前暫時不顯示：${stockDisplay}
 
         // 更新按鈕狀態
         if (remaining > 0) {
@@ -1045,8 +1047,9 @@ function updateProductPrice(groupId) {
         }
     } else {
         priceDisplay.textContent = '請選擇類型';
-        stockDisplay.textContent = '請先選擇類型';
-        stockDisplay.className = 'product-stock';
+        // stockDisplay.textContent = '請先選擇類型';
+        // stockDisplay.className = 'product-stock';
+        // TODO: 剩餘數量目前暫時不顯示：${stockDisplay}
         addButton.textContent = '請先選擇類型';
         addButton.disabled = true;
     }
@@ -1721,7 +1724,7 @@ function closeAndNavigateIG() {
 function continueOrder() {
     // 關閉Modal
     closeModal();
-    
+
     // 完全重置訂單狀態
     clearOrder();
 
