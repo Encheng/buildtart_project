@@ -1632,15 +1632,18 @@ function createSuccessModal(orderData) {
             <!-- 成功圖示與標題 -->
             <div class="success-header">
                 <h2>訂單提交成功！</h2>
-                <p class="success-subtitle">您的訂單已安全送達築塔 STUDIO</p>
             </div>
 
-            <!-- 訂單摘要 -->
-            <div class="order-summary-section">
-                <h3><span class="icon">📋</span> 您的訂單</h3>
-                <div class="order-details">
-                    <pre class="order-content">${orderData.orderSummary}</pre>
-                </div>
+            <!-- 行動按鈕組 -->
+            <div class="modal-actions">
+                <button class="secondary-btn" onclick="continueOrder()">
+                    <span class="btn-icon">🛒</span>
+                    繼續下單
+                </button>
+                <button class="primary-btn" onclick="closeAndNavigateIG()">
+                    <span class="btn-icon">💬</span>
+                    前往IG私訊
+                </button>
             </div>
 
             <!-- 重要下一步 -->
@@ -1671,16 +1674,12 @@ function createSuccessModal(orderData) {
                 </div>
             </div>
 
-            <!-- 行動按鈕組 -->
-            <div class="modal-actions">
-                <button class="secondary-btn" onclick="continueOrder()">
-                    <span class="btn-icon">🛒</span>
-                    繼續下單
-                </button>
-                <button class="primary-btn" onclick="closeAndNavigateIG()">
-                    <span class="btn-icon">💬</span>
-                    前往IG私訊
-                </button>
+            <!-- 訂單摘要 -->
+            <div class="order-summary-section">
+                <h3><span class="icon">📋</span> 您的訂單</h3>
+                <div class="order-details">
+                    <pre class="order-content">${orderData.orderSummary}</pre>
+                </div>
             </div>
 
             <!-- 關閉按鈕 -->
