@@ -862,7 +862,7 @@ function displayProducts(products) {
         productsContainer.innerHTML = `
             <div class="no-products-message">
                 <h3>注意事項</h3>
-                <p>請選擇右上角出貨日期，如需下午茶訂購可私訊
+                <p>請選擇右上角取貨日期，如需下午茶訂購可私訊
                 <a href="https://www.instagram.com/buildtart.studio/" target="_blank" class="ig-link" id="igLink">@buildtart.studio</a>
                 </p>
             </div>`;
@@ -1153,7 +1153,7 @@ function showDateChangeNotification() {
     notification.className = 'date-change-notification';
     notification.innerHTML = `
         <div class="notification-content">
-            ⚠️ 已切換出貨日期，訂單已清空
+            ⚠️ 已切換取貨日期，訂單已清空
         </div>
     `;
 
@@ -1465,7 +1465,7 @@ function handleOrderSubmit(e) {
 function generateOrderSummary() {
     const selectedDate = document.getElementById('dateSelect').value;
     const paymentMethod = document.getElementById('paymentMethod').value;
-    let summary = `出貨日期：${selectedDate}\n付款方式：${paymentMethod}\n訂單內容：\n`;
+    let summary = `取貨日期：${selectedDate}\n付款方式：${paymentMethod}\n訂單內容：\n`;
 
     orderItems.forEach(item => {
         // 包含產品ID和日期資訊，方便Excel公式解析
@@ -1628,7 +1628,6 @@ function createSuccessModal(orderData) {
         <div class="modal-content">
             <!-- 成功圖示與標題 -->
             <div class="success-header">
-                <div class="success-icon">🎉</div>
                 <h2>訂單提交成功！</h2>
                 <p class="success-subtitle">您的訂單已安全送達築塔 STUDIO</p>
             </div>
