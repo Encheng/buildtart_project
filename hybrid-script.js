@@ -1721,20 +1721,8 @@ function closeAndNavigateIG() {
 
 // 繼續下單
 function continueOrder() {
-    // 關閉Modal
-    closeModal();
-
-    // 完全重置訂單狀態
-    clearOrder();
-
-    // 滾動到產品區域
-    document.getElementById('products').scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-    });
-
-    // 短暫提示
-    showQuickNotification('可以繼續選擇其他甜點訂購 🧁');
+    // 直接刷新頁面，簡單有效
+    location.reload();
 }
 
 // 關閉Modal
