@@ -1859,6 +1859,10 @@ function updateDeliveryOptions() {
     const selectedDate = new Date(pickupDateInput.value);
     const dayOfWeek = selectedDate.getDay(); // 0=週日, 1=週一, ..., 6=週六
 
+    // 動態計算選定日期的外送數量
+    const formattedSelectedDate = formatDateForComparison(pickupDateInput.value);
+    const selectedDateDeliveryCount = globalData.dailyDeliveryStats ? (globalData.dailyDeliveryStats[formattedSelectedDate] || 0) : 0;
+
     // 清空現有選項
     deliveryMethodSelect.innerHTML = '';
 
@@ -1870,7 +1874,7 @@ function updateDeliveryOptions() {
         `;
 
         // 檢查外送數量限制
-        if (dailyDeliveryCount < MAX_DAILY_DELIVERY) {
+        if (selectedDateDeliveryCount < MAX_DAILY_DELIVERY) {
             options += `<option value="新竹-外送 (20:00~22:00, 須滿$300, 無法指定送達時間)">新竹 - 外送 (20:00~22:00, 須滿$300, 無法指定送達時間)</option>`;
         } else {
             options += `<option value="" disabled>新竹 - 外送 (今日外送已滿)</option>`;
@@ -1888,7 +1892,7 @@ function updateDeliveryOptions() {
         let options = `<option value="">請選擇取貨方式</option>`;
 
         // 檢查外送數量限制
-        if (dailyDeliveryCount < MAX_DAILY_DELIVERY) {
+        if (selectedDateDeliveryCount < MAX_DAILY_DELIVERY) {
             options += `<option value="臺中-外送 (14:00~16:00, 須滿$300, 無法指定送達時間)">臺中 - 外送 (14:00~16:00, 須滿$300, 無法指定送達時間)</option>`;
         } else {
             options += `<option value="" disabled>臺中 - 外送 (今日外送已滿)</option>`;
