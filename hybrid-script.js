@@ -1405,6 +1405,23 @@ function handleOrderSubmit(e) {
         return;
     }
 
+    // 進階驗證 - 使用正規表達式
+    // 驗證姓名至少 2 個字
+    if (!/^.{2,}$/.test(customerName)) {
+        alert('「姓名」請輸入至少 2 個字');
+        return;
+    }
+
+    if (!/^09[0-9]{8}$/.test(customerPhone)) {
+        alert('「電話號碼」請輸入 10 位數字手機號碼，例如 0912345678');
+        return;
+    }
+
+    if (!/^[a-zA-Z0-9._]{1,30}$/.test(customerInstagram)) {
+        alert('「IG帳號」請輸入有效 IG 帳號，例如 buildtart.studio');
+        return;
+    }
+
     if (!pickupDate) {
         alert('請選擇取貨日期');
         return;
