@@ -1489,7 +1489,7 @@ function generateOrderSummary() {
 
     orderItems.forEach(item => {
         // 包含產品ID和日期資訊，方便Excel公式解析
-        summary += `• ${item.name} (${item.productId}) x ${item.quantity} = NT$ ${item.price * item.quantity}\n`;
+        summary += `• ${item.name} x ${item.quantity} = NT$ ${item.price * item.quantity}\n`;
     });
     summary += `\n總金額：NT$ ${totalAmount}`;
 
