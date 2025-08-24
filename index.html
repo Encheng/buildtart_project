@@ -131,7 +131,21 @@
                             <textarea id="specialRequests" name="specialRequests" rows="3"></textarea>
                         </div>
                         <div class="form-group">
+                            <label for="promoCode">優惠碼 <small>(選填)</small></label>
+                            <div class="promo-code-wrapper">
+                                <input type="text" id="promoCode" name="promoCode" placeholder="請輸入優惠碼">
+                                <button type="button" id="applyPromoBtn" class="apply-promo-btn" onclick="applyPromoCode()">套用</button>
+                            </div>
+                            <div id="promoMessage" class="promo-message"></div>
+                        </div>
+                        <div class="form-group">
                             <div class="total-amount">
+                                <div id="originalAmount" class="original-amount" style="display: none;">
+                                    原價：NT$ <span id="originalTotal">0</span>
+                                </div>
+                                <div id="discountAmount" class="discount-amount" style="display: none;">
+                                    優惠折扣：-NT$ <span id="discountTotal">0</span>
+                                </div>
                                 <strong>總金額：NT$ <span id="totalAmount">0</span></strong>
                             </div>
                         </div>
@@ -192,6 +206,7 @@
         <div class="cart-badge" id="cartBadge">0</div>
     </div>
 
+    <script src="promo-codes.js"></script>
     <script src="hybrid-script.js"></script>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-T1DVFVDLWV"></script>

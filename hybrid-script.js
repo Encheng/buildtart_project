@@ -14,6 +14,11 @@ let isFirstTimeAddingProduct = true; // 追蹤是否為第一次加入商品
 let dailyDeliveryCount = 0; // 當日外送訂單數量
 const MAX_DAILY_DELIVERY = 6; // 每日最大外送次數
 
+// 優惠碼相關變數
+let appliedPromoCode = null; // 目前套用的優惠碼
+let originalTotalAmount = 0; // 原始金額（未折扣前）
+let discountAmount = 0; // 折扣金額
+
 // 新增：全域資料快取（不包含客戶個人資料）
 let globalData = {
     productData: null,
@@ -1341,8 +1346,126 @@ function removeFromOrder(productId) {
 }
 
 function updateTotalAmount() {
-    totalAmount = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    document.getElementById('totalAmount').textContent = totalAmount;
+    // 計算原始金額
+    originalTotalAmount = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+    // 檢查是否有套用的優惠碼，並驗證是否仍符合條件
+    if (appliedPromoCode) {
+        const validation = validatePromoCode(appliedPromoCode.code, originalTotalAmount);
+        if (validation.valid) {
+            discountAmount = validation.discount;
+            totalAmount = originalTotalAmount - discountAmount;
+        } else {
+            // 如果不再符合條件，移除優惠碼
+            removePromoCode();
+            totalAmount = originalTotalAmount;
+        }
+    } else {
+        discountAmount = 0;
+        totalAmount = originalTotalAmount;
+    }
+
+    // 更新顯示
+    updatePriceDisplay();
+}
+
+// 更新價格顯示
+function updatePriceDisplay() {
+    const originalAmountDiv = document.getElementById('originalAmount');
+    const discountAmountDiv = document.getElementById('discountAmount');
+    const totalAmountSpan = document.getElementById('totalAmount');
+
+    if (appliedPromoCode && discountAmount > 0) {
+        // 顯示原價
+        document.getElementById('originalTotal').textContent = originalTotalAmount;
+        originalAmountDiv.style.display = 'block';
+
+        // 顯示折扣
+        document.getElementById('discountTotal').textContent = discountAmount;
+        discountAmountDiv.style.display = 'block';
+    } else {
+        // 隱藏原價和折扣
+        originalAmountDiv.style.display = 'none';
+        discountAmountDiv.style.display = 'none';
+    }
+
+    // 更新最終金額
+    totalAmountSpan.textContent = totalAmount;
+}
+
+// 套用優惠碼
+function applyPromoCode() {
+    const promoCodeInput = document.getElementById('promoCode');
+    const promoMessageDiv = document.getElementById('promoMessage');
+    const applyBtn = document.getElementById('applyPromoBtn');
+
+    const code = promoCodeInput.value.trim();
+    if (!code) {
+        showPromoMessage('請輸入優惠碼', 'error');
+        return;
+    }
+
+    // 計算目前的原始金額
+    const currentOriginalAmount = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+    // 驗證優惠碼
+    const validation = validatePromoCode(code, currentOriginalAmount);
+
+    if (validation.valid) {
+        // 套用優惠碼
+        appliedPromoCode = {
+            code: code,
+            name: validation.name,
+            discount: validation.discount,
+            description: validation.description
+        };
+
+        // 更新金額顯示
+        updateTotalAmount();
+
+        // 顯示成功訊息
+        showPromoMessage(validation.message, 'success');
+
+        // 更改按鈕文字
+        applyBtn.textContent = '移除';
+        applyBtn.onclick = removePromoCode;
+
+        // 禁用輸入框
+        promoCodeInput.disabled = true;
+    } else {
+        showPromoMessage(validation.message, 'error');
+    }
+}
+
+// 移除優惠碼
+function removePromoCode() {
+    const promoCodeInput = document.getElementById('promoCode');
+    const promoMessageDiv = document.getElementById('promoMessage');
+    const applyBtn = document.getElementById('applyPromoBtn');
+
+    // 清除優惠碼
+    appliedPromoCode = null;
+    discountAmount = 0;
+
+    // 更新金額顯示
+    updateTotalAmount();
+
+    // 重置UI
+    promoCodeInput.value = '';
+    promoCodeInput.disabled = false;
+    applyBtn.textContent = '套用';
+    applyBtn.onclick = applyPromoCode;
+
+    // 清除訊息
+    promoMessageDiv.textContent = '';
+    promoMessageDiv.className = 'promo-message';
+}
+
+// 顯示優惠碼訊息
+function showPromoMessage(message, type) {
+    const promoMessageDiv = document.getElementById('promoMessage');
+    promoMessageDiv.textContent = message;
+    promoMessageDiv.className = `promo-message ${type}`;
 }
 
 // 處理訂單提交 - 重導向到 Google Forms
@@ -1491,7 +1614,15 @@ function generateOrderSummary() {
         // 包含產品ID和日期資訊，方便Excel公式解析
         summary += `• ${item.name} x ${item.quantity} = NT$ ${item.price * item.quantity}\n`;
     });
-    summary += `\n總金額：NT$ ${totalAmount}`;
+
+    // 加入優惠碼資訊（如果有的話）
+    if (appliedPromoCode && discountAmount > 0) {
+        summary += `\n小計：NT$ ${originalTotalAmount}`;
+        summary += `\n優惠碼：${appliedPromoCode.code} (${appliedPromoCode.name}) -NT$ ${discountAmount}`;
+        summary += `\n總金額：NT$ ${totalAmount}`;
+    } else {
+        summary += `\n總金額：NT$ ${totalAmount}`;
+    }
 
     // 為了方便Excel解析，額外添加結構化資料
     summary += '\n---產品明細---\n';
@@ -1802,6 +1933,28 @@ function showErrorMessage(message) {
 function clearOrder() {
     orderItems = [];
     totalAmount = 0;
+
+    // 清除優惠碼相關資料
+    appliedPromoCode = null;
+    originalTotalAmount = 0;
+    discountAmount = 0;
+
+    // 重置優惠碼UI
+    const promoCodeInput = document.getElementById('promoCode');
+    const promoMessageDiv = document.getElementById('promoMessage');
+    const applyBtn = document.getElementById('applyPromoBtn');
+
+    if (promoCodeInput) promoCodeInput.value = '';
+    if (promoCodeInput) promoCodeInput.disabled = false;
+    if (applyBtn) {
+        applyBtn.textContent = '套用';
+        applyBtn.onclick = applyPromoCode;
+    }
+    if (promoMessageDiv) {
+        promoMessageDiv.textContent = '';
+        promoMessageDiv.className = 'promo-message';
+    }
+
     updateOrderDisplay();
     updateTotalAmount();
     updateFloatingCartBadge();
