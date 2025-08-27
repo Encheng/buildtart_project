@@ -147,47 +147,61 @@ function updateAddressRequiredStatus(deliveryMethod) {
     const districtSelect = document.getElementById('districtSelect');
     const detailAddress = document.getElementById('detailAddress');
 
-    // 找到地址標籤 - 通過父元素查找
-    let addressLabel = null;
+    // 找到地址欄位的整個form-group容器
+    let addressFormGroup = null;
     if (citySelect) {
-        const formGroup = citySelect.closest('.form-group');
-        if (formGroup) {
-            addressLabel = formGroup.querySelector('label');
-        }
+        addressFormGroup = citySelect.closest('.form-group');
     }
 
     // 判斷是否為面交
     const isFaceToFace = deliveryMethod.includes('面交');
 
     if (isFaceToFace) {
-        // 面交：地址非必填
-        if (citySelect) citySelect.removeAttribute('required');
-        if (districtSelect) districtSelect.removeAttribute('required');
-        if (detailAddress) detailAddress.removeAttribute('required');
-
-        // 更新標籤文字
-        if (addressLabel) {
-            addressLabel.innerHTML = '配送地址 <small>(面交不需填)</small>';
+        // 面交：完全隱藏地址欄位
+        if (addressFormGroup) {
+            addressFormGroup.style.display = 'none';
         }
 
-        // 清空地址內容
-        if (citySelect) citySelect.value = '';
+        // 清空地址內容和移除必填屬性
+        if (citySelect) {
+            citySelect.value = '';
+            citySelect.removeAttribute('required');
+        }
         if (districtSelect) {
             districtSelect.value = '';
             districtSelect.disabled = true;
+            districtSelect.removeAttribute('required');
         }
-        if (detailAddress) detailAddress.value = '';
+        if (detailAddress) {
+            detailAddress.value = '';
+            detailAddress.removeAttribute('required');
+        }
 
     } else if (deliveryMethod.includes('外送')) {
-        // 外送：地址必填
+        // 外送：顯示地址欄位並設為必填
+        if (addressFormGroup) {
+            addressFormGroup.style.display = 'block';
+        }
+
         if (citySelect) citySelect.setAttribute('required', 'required');
-        if (districtSelect) districtSelect.setAttribute('required', 'required');
+        if (districtSelect) {
+            districtSelect.setAttribute('required', 'required');
+            districtSelect.disabled = false;
+        }
         if (detailAddress) detailAddress.setAttribute('required', 'required');
 
-        // 更新標籤文字
-        if (addressLabel) {
-            addressLabel.innerHTML = '配送地址 *';
+    } else {
+        // 其他情況（如未選擇取貨方式）：顯示地址欄位但不強制必填
+        if (addressFormGroup) {
+            addressFormGroup.style.display = 'block';
         }
+
+        if (citySelect) citySelect.removeAttribute('required');
+        if (districtSelect) {
+            districtSelect.removeAttribute('required');
+            districtSelect.disabled = true;
+        }
+        if (detailAddress) detailAddress.removeAttribute('required');
     }
 }
 
@@ -1608,7 +1622,35 @@ function handleOrderSubmit(e) {
 function generateOrderSummary() {
     const selectedDate = document.getElementById('dateSelect').value;
     const paymentMethod = document.getElementById('paymentMethod').value;
-    let summary = `取貨日期：${selectedDate}\n付款方式：${paymentMethod}\n訂單內容：\n`;
+    const deliveryMethod = document.getElementById('deliveryMethod').value;
+    const specialRequests = document.getElementById('specialRequests').value.trim();
+    
+    // 判斷是否為面交，決定是否需要配送地址
+    const isFaceToFace = deliveryMethod.includes('面交');
+    let customerAddress = '';
+    
+    if (!isFaceToFace && deliveryMethod.includes('外送')) {
+        // 外送才需要配送地址
+        const city = document.getElementById('citySelect').value;
+        const district = document.getElementById('districtSelect').value;
+        const detailAddress = document.getElementById('detailAddress').value.trim();
+        customerAddress = `${city}${district}${detailAddress}`;
+    }
+    
+    // 開始組成摘要
+    let summary = `取貨日期：${selectedDate}\n付款方式：${paymentMethod}\n取貨方式：${deliveryMethod}`;
+    
+    // 如果是外送，加上配送地址
+    if (!isFaceToFace && customerAddress) {
+        summary += `\n配送地址：${customerAddress}`;
+    }
+    
+    // 如果有包裝需求，加上包裝需求
+    if (specialRequests) {
+        summary += `\n包裝需求：${specialRequests}`;
+    }
+    
+    summary += `\n\n訂單內容：\n`;
 
     orderItems.forEach(item => {
         // 包含產品ID和日期資訊，方便Excel公式解析
