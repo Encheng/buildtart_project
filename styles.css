@@ -2077,6 +2077,47 @@ footer {
     margin-bottom: 8px;
 }
 
+/* 手機版表單樣式修正 */
+@media (max-width: 768px) {
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        font-size: 16px; /* 防止iOS縮放 */
+        padding: 12px 10px; /* 稍微增加垂直內邊距以改善觸控體驗 */
+    }
+    
+    /* 特別針對日期輸入框的樣式修正 */
+    input[type="date"] {
+        -webkit-appearance: none;
+        -moz-appearance: textfield;
+        appearance: none;
+        background-color: #fff;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        padding: 12px 10px;
+        font-size: 16px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .order-form-container {
+        padding: 1.5rem;
+        margin: 0 10px;
+    }
+    
+    .address-selectors {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* 手機版優惠碼樣式 */
 @media (max-width: 768px) {
     .promo-code-wrapper {
