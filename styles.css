@@ -166,6 +166,10 @@ h1, h2, h3, h4, h5, h6, p, div, span, a, button, input, select, textarea, label 
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 5px;
     min-width: 200px;
+    max-width: 300px;
+    max-height: 400px; /* 限制最大高度 */
+    overflow-y: auto; /* 加入垂直捲軸 */
+    overflow-x: hidden; /* 隱藏水平捲軸 */
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     opacity: 0;
     visibility: hidden;
@@ -176,6 +180,30 @@ h1, h2, h3, h4, h5, h6, p, div, span, a, button, input, select, textarea, label 
     padding: 0.5rem 0;
     margin: 0;
     margin-top: 0.5rem;
+    /* 捲軸樣式 */
+    scrollbar-width: thin;
+    scrollbar-color: #8B7355 #F2ECE0;
+}
+
+/* Webkit 瀏覽器的捲軸樣式 */
+.dropdown-menu::-webkit-scrollbar {
+    width: 8px;
+}
+
+.dropdown-menu::-webkit-scrollbar-track {
+    background: rgba(139, 115, 85, 0.1);
+    border-radius: 4px;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb {
+    background: #8B7355;
+    border-radius: 4px;
+    opacity: 0.7;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb:hover {
+    background: #6F5A42;
+    opacity: 1;
 }
 
 .nav-dropdown:hover .dropdown-menu {
@@ -1944,38 +1972,38 @@ footer {
         max-height: 90vh;
         border-radius: 16px;
     }
-    
+
     .success-header h2 {
         font-size: 1.6rem;
     }
-    
+
     .success-icon {
         font-size: 3rem;
     }
-    
+
     .step-list {
         gap: 16px;
     }
-    
+
     .step {
         padding: 12px;
     }
-    
+
     .modal-actions {
         flex-direction: column;
         gap: 12px;
     }
-    
+
     .primary-btn, .secondary-btn {
         padding: 16px 20px;
         font-size: 1.1rem;
     }
-    
+
     .order-content {
         font-size: 13px;
         padding: 16px;
     }
-    
+
     .quick-notification {
         top: 10px;
         right: 10px;
@@ -1983,7 +2011,7 @@ footer {
         transform: translateY(-100%);
         text-align: center;
     }
-    
+
     .quick-notification.show {
         transform: translateY(0);
     }
@@ -2082,7 +2110,7 @@ footer {
     .form-group {
         margin-bottom: 1rem;
     }
-    
+
     .form-group input,
     .form-group select,
     .form-group textarea {
@@ -2092,7 +2120,7 @@ footer {
         font-size: 16px; /* 防止iOS縮放 */
         padding: 12px 10px; /* 稍微增加垂直內邊距以改善觸控體驗 */
     }
-    
+
     /* 特別針對日期輸入框的樣式修正 */
     input[type="date"] {
         -webkit-appearance: none;
@@ -2107,12 +2135,12 @@ footer {
         max-width: 100%;
         box-sizing: border-box;
     }
-    
+
     .order-form-container {
         padding: 1.5rem;
         margin: 0 10px;
     }
-    
+
     .address-selectors {
         grid-template-columns: 1fr;
     }
@@ -2124,7 +2152,7 @@ footer {
         flex-direction: column;
         gap: 8px;
     }
-    
+
     .apply-promo-btn {
         width: 100%;
         padding: 10px 16px;
