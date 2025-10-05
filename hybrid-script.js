@@ -792,7 +792,7 @@ function populateNavDateSelect(dates) {
         const formattedDate = formatDateForComparison(date);
         const deliveryCount = globalData.dailyDeliveryStats ? (globalData.dailyDeliveryStats[formattedDate] || 0) : 0;
         const maxDelivery = globalData.maxDelivery || MAX_DAILY_DELIVERY;
-        const isDeliveryFull = deliveryCount >= 1;
+        const isDeliveryFull = deliveryCount >= maxDelivery;
 
         // 建立日期內容
         const dateText = formatDisplayDate(date);
