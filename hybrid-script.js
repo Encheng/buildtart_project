@@ -322,7 +322,9 @@ function setupMobileDropdown() {
 
         // 點擊日期項目後關閉下拉選單（手機版）
         dropdownMenu.addEventListener('click', function(e) {
-            if (e.target.classList.contains('dropdown-item') && window.innerWidth <= 768) {
+            // 檢查點擊的元素是否為日期項目或其子元素
+            const clickedItem = e.target.closest('.dropdown-item');
+            if (clickedItem && window.innerWidth <= 768) {
                 navDropdown.classList.remove('active');
                 dropdownMenu.classList.remove('show');
                 // 選擇日期後也關閉整個漢堡選單
