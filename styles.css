@@ -235,6 +235,24 @@ h1, h2, h3, h4, h5, h6, p, div, span, a, button, input, select, textarea, label 
     cursor: default;
 }
 
+/* 日期選項樣式 */
+.date-option {
+    text-align: left;
+}
+
+.date-text {
+    font-size: 0.9rem;
+    color: #8B7355;
+    margin-bottom: 2px;
+}
+
+.delivery-status {
+    font-size: 0.75rem;
+    color: #dc3545;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
 .dropdown-item.loading:hover {
     background-color: transparent;
 }
@@ -1212,6 +1230,24 @@ footer {
         text-align: center;
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* 手機版日期選項樣式 */
+    .dropdown-item .date-option {
+        text-align: center;
+    }
+    
+    .dropdown-item .date-text {
+        font-size: 1rem;
+        color: #8B7335;
+        margin-bottom: 4px;
+    }
+    
+    .dropdown-item .delivery-status {
+        font-size: 0.8rem;
+        color: #dc3545;
+        font-weight: 500;
+        line-height: 1.2;
     }
 
     .dropdown-item:hover {

@@ -787,7 +787,26 @@ function populateNavDateSelect(dates) {
     dates.forEach(date => {
         const dateItem = document.createElement('li');
         dateItem.className = 'dropdown-item';
-        dateItem.textContent = formatDisplayDate(date);
+
+        // 檢查該日期的外送數量是否額滿
+        const formattedDate = formatDateForComparison(date);
+        const deliveryCount = globalData.dailyDeliveryStats ? (globalData.dailyDeliveryStats[formattedDate] || 0) : 0;
+        const maxDelivery = globalData.maxDelivery || MAX_DAILY_DELIVERY;
+        const isDeliveryFull = deliveryCount >= 1;
+
+        // 建立日期內容
+        const dateText = formatDisplayDate(date);
+        if (isDeliveryFull) {
+            dateItem.innerHTML = `
+                <div class="date-option">
+                    <div class="date-text">${dateText}</div>
+                    <div class="delivery-status">外送額滿，僅限自取</div>
+                </div>
+            `;
+        } else {
+            dateItem.textContent = dateText;
+        }
+
         dateItem.setAttribute('data-date', date);
         dateItem.addEventListener('click', function(e) {
             e.preventDefault();
@@ -1624,11 +1643,11 @@ function generateOrderSummary() {
     const paymentMethod = document.getElementById('paymentMethod').value;
     const deliveryMethod = document.getElementById('deliveryMethod').value;
     const specialRequests = document.getElementById('specialRequests').value.trim();
-    
+
     // 判斷是否為面交，決定是否需要配送地址
     const isFaceToFace = deliveryMethod.includes('面交');
     let customerAddress = '';
-    
+
     if (!isFaceToFace && deliveryMethod.includes('外送')) {
         // 外送才需要配送地址
         const city = document.getElementById('citySelect').value;
@@ -1636,20 +1655,20 @@ function generateOrderSummary() {
         const detailAddress = document.getElementById('detailAddress').value.trim();
         customerAddress = `${city}${district}${detailAddress}`;
     }
-    
+
     // 開始組成摘要
     let summary = `取貨日期：${selectedDate}\n付款方式：${paymentMethod}\n取貨方式：${deliveryMethod}`;
-    
+
     // 如果是外送，加上配送地址
     if (!isFaceToFace && customerAddress) {
         summary += `\n配送地址：${customerAddress}`;
     }
-    
+
     // 如果有包裝需求，加上包裝需求
     if (specialRequests) {
         summary += `\n包裝需求：${specialRequests}`;
     }
-    
+
     summary += `\n\n訂單內容：\n`;
 
     orderItems.forEach(item => {
