@@ -108,6 +108,23 @@
                                 <option value="">請先選擇取貨日期</option>
                             </select>
                         </div>
+
+                        <div class="form-group" id="deliveryReceiptGroup" style="display: none;">
+                            <label>收件方式 *</label>
+                            <div class="receipt-options">
+                                <label class="receipt-option">
+                                    <input type="radio" name="receiptMethod" value="本人親收" required>
+                                    <span class="option-text">本人親收</span>
+                                    <small class="option-desc">本人在指定地址收件</small>
+                                </label>
+                                <label class="receipt-option">
+                                    <input type="radio" name="receiptMethod" value="管理室寄冰" required>
+                                    <span class="option-text">管理室寄冰</span>
+                                    <small class="option-desc">由大樓管理室冷藏代收</small>
+                                </label>
+                            </div>
+                        </div>
+
                         <div class="form-group">
                             <label>配送地址</label>
                             <div class="address-selectors">

@@ -146,6 +146,8 @@ function updateAddressRequiredStatus(deliveryMethod) {
     const citySelect = document.getElementById('citySelect');
     const districtSelect = document.getElementById('districtSelect');
     const detailAddress = document.getElementById('detailAddress');
+    const deliveryReceiptGroup = document.getElementById('deliveryReceiptGroup');
+    const receiptMethodRadios = document.querySelectorAll('input[name="receiptMethod"]');
 
     // 找到地址欄位的整個form-group容器
     let addressFormGroup = null;
@@ -155,11 +157,15 @@ function updateAddressRequiredStatus(deliveryMethod) {
 
     // 判斷是否為面交
     const isFaceToFace = deliveryMethod.includes('面交');
+    const isDelivery = deliveryMethod.includes('外送');
 
     if (isFaceToFace) {
-        // 面交：完全隱藏地址欄位
+        // 面交：隱藏地址欄位和收件方式
         if (addressFormGroup) {
             addressFormGroup.style.display = 'none';
+        }
+        if (deliveryReceiptGroup) {
+            deliveryReceiptGroup.style.display = 'none';
         }
 
         // 清空地址內容和移除必填屬性
@@ -177,10 +183,19 @@ function updateAddressRequiredStatus(deliveryMethod) {
             detailAddress.removeAttribute('required');
         }
 
-    } else if (deliveryMethod.includes('外送')) {
-        // 外送：顯示地址欄位並設為必填
+        // 清空收件方式選擇
+        receiptMethodRadios.forEach(radio => {
+            radio.checked = false;
+            radio.removeAttribute('required');
+        });
+
+    } else if (isDelivery) {
+        // 外送：顯示地址欄位和收件方式，並設為必填
         if (addressFormGroup) {
             addressFormGroup.style.display = 'block';
+        }
+        if (deliveryReceiptGroup) {
+            deliveryReceiptGroup.style.display = 'block';
         }
 
         if (citySelect) citySelect.setAttribute('required', 'required');
@@ -190,10 +205,18 @@ function updateAddressRequiredStatus(deliveryMethod) {
         }
         if (detailAddress) detailAddress.setAttribute('required', 'required');
 
+        // 設定收件方式為必填
+        receiptMethodRadios.forEach(radio => {
+            radio.setAttribute('required', 'required');
+        });
+
     } else {
-        // 其他情況（如未選擇取貨方式）：顯示地址欄位但不強制必填
+        // 其他情況（如未選擇取貨方式）：顯示地址欄位但不強制必填，隱藏收件方式
         if (addressFormGroup) {
             addressFormGroup.style.display = 'block';
+        }
+        if (deliveryReceiptGroup) {
+            deliveryReceiptGroup.style.display = 'none';
         }
 
         if (citySelect) citySelect.removeAttribute('required');
@@ -202,6 +225,12 @@ function updateAddressRequiredStatus(deliveryMethod) {
             districtSelect.disabled = true;
         }
         if (detailAddress) detailAddress.removeAttribute('required');
+
+        // 清空收件方式選擇
+        receiptMethodRadios.forEach(radio => {
+            radio.checked = false;
+            radio.removeAttribute('required');
+        });
     }
 }
 
@@ -1612,6 +1641,13 @@ function handleOrderSubmit(e) {
             alert('請輸入詳細地址');
             return;
         }
+
+        // 外送時需要選擇收件方式
+        const receiptMethod = document.querySelector('input[name="receiptMethod"]:checked');
+        if (!receiptMethod) {
+            alert('請選擇外送收件方式');
+            return;
+        }
     }
 
     // 驗證條款確認
@@ -1624,6 +1660,15 @@ function handleOrderSubmit(e) {
     // 生成訂單摘要
     const orderSummary = generateOrderSummary();
 
+    // 取得外送收件方式（如果是外送的話）
+    let receiptMethod = '';
+    if (deliveryMethod.includes('外送')) {
+        const receiptMethodRadio = document.querySelector('input[name="receiptMethod"]:checked');
+        if (receiptMethodRadio) {
+            receiptMethod = receiptMethodRadio.value;
+        }
+    }
+
     // 直接提交到 Google Forms
     submitToGoogleForm({
         customerName,
@@ -1633,6 +1678,7 @@ function handleOrderSubmit(e) {
         paymentMethod,
         customerAddress,
         deliveryMethod,
+        receiptMethod,
         orderSummary,
         totalAmount,
         specialRequests
@@ -1649,20 +1695,30 @@ function generateOrderSummary() {
     // 判斷是否為面交，決定是否需要配送地址
     const isFaceToFace = deliveryMethod.includes('面交');
     let customerAddress = '';
+    let receiptMethod = '';
 
     if (!isFaceToFace && deliveryMethod.includes('外送')) {
-        // 外送才需要配送地址
+        // 外送才需要配送地址和收件方式
         const city = document.getElementById('citySelect').value;
         const district = document.getElementById('districtSelect').value;
         const detailAddress = document.getElementById('detailAddress').value.trim();
         customerAddress = `${city}${district}${detailAddress}`;
+
+        // 取得外送收件方式
+        const receiptMethodRadio = document.querySelector('input[name="receiptMethod"]:checked');
+        if (receiptMethodRadio) {
+            receiptMethod = receiptMethodRadio.value;
+        }
     }
 
     // 開始組成摘要
     let summary = `取貨日期：${selectedDate}\n付款方式：${paymentMethod}\n取貨方式：${deliveryMethod}`;
 
-    // 如果是外送，加上配送地址
+    // 如果是外送，加上配送地址和收件方式
     if (!isFaceToFace && customerAddress) {
+        if (receiptMethod) {
+            summary += `\n收件方式：${receiptMethod}`;
+        }
         summary += `\n配送地址：${customerAddress}`;
     }
 
@@ -1787,6 +1843,7 @@ async function submitToGoogleForm(orderData) {
         formData.append('entry.1047149694', orderData.pickupDate);           // 取貨日期欄位
         formData.append('entry.1069013189', orderData.paymentMethod);        // 付款方式欄位
         formData.append('entry.1645634297', orderData.deliveryMethod);       // 取貨方式欄位
+        formData.append('entry.906012403', orderData.receiptMethod || '');   // 收件方式欄位
         formData.append('entry.82924036', orderData.customerAddress);        // 配送地址欄位
         formData.append('entry.1969932251', orderData.orderSummary);         // 訂單內容欄位
         formData.append('entry.247157095', orderData.totalAmount);          // 總金額欄位
