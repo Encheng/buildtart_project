@@ -1536,6 +1536,34 @@ function showPromoMessage(message, type) {
 function handleOrderSubmit(e) {
     e.preventDefault();
 
+    // 防重複提交檢查 - 5分鐘內不能重複提交
+    const lastSubmitTime = localStorage.getItem('lastOrderSubmitTime');
+    if (lastSubmitTime) {
+        const currentTime = Date.now();
+        const timeDiff = currentTime - parseInt(lastSubmitTime);
+        const fiveMinutesInMs = 5 * 60 * 1000; // 5分鐘 = 300,000毫秒
+
+        if (timeDiff < fiveMinutesInMs) {
+            const remainingMinutes = Math.ceil((fiveMinutesInMs - timeDiff) / 60000);
+
+            // 讀取上次訂單資料
+            const lastOrderDataStr = localStorage.getItem('lastOrderData');
+            if (lastOrderDataStr) {
+                try {
+                    const lastOrderData = JSON.parse(lastOrderDataStr);
+                    // 顯示重複訂單警告 Modal
+                    showDuplicateOrderWarning(lastOrderData, remainingMinutes);
+                } catch (error) {
+                    console.error('解析上次訂單資料失敗:', error);
+                    alert(`為避免重複訂單，請等待 ${remainingMinutes} 分鐘後再次提交。\n\n如果您剛才的訂單已成功提交，我們會盡快與您聯繫確認。`);
+                }
+            } else {
+                alert(`為避免重複訂單，請等待 ${remainingMinutes} 分鐘後再次提交。\n\n如果您剛才的訂單已成功提交，我們會盡快與您聯繫確認。`);
+            }
+            return;
+        }
+    }
+
     // 基本驗證
     if (orderItems.length === 0) {
         alert('請至少選擇一個產品');
@@ -1858,6 +1886,11 @@ async function submitToGoogleForm(orderData) {
 
         // 由於是 no-cors 模式，我們無法檢查 response status
         // 但通常如果沒有錯誤，就代表提交成功
+
+        // 記錄提交時間和訂單資料到 localStorage（用於防重複提交）
+        localStorage.setItem('lastOrderSubmitTime', Date.now().toString());
+        localStorage.setItem('lastOrderData', JSON.stringify(orderData));
+
         showSuccessMessage(orderData);
 
         // 清空訂單（這裡會重置按鈕狀態）
@@ -1974,6 +2007,118 @@ function createSuccessModal(orderData) {
     });
 
     return modal;
+}
+
+// 創建重複訂單警告Modal（極簡版）
+function createDuplicateOrderModal(lastOrderData, remainingMinutes) {
+    const modal = document.createElement('div');
+    modal.className = 'success-modal';
+
+    // 計算提交了多久（更友善的顯示）
+    const timeAgo = remainingMinutes >= 5 ? '剛剛' : `${5 - remainingMinutes} 分鐘前`;
+
+    modal.innerHTML = `
+        <div class="modal-content duplicate-modal-content">
+            <!-- 標題區塊 -->
+            <div class="duplicate-header">
+                <div class="success-icon">✓</div>
+                <h2>您的訂單已收到！</h2>
+            </div>
+
+            <!-- 主要說明 -->
+            <div class="duplicate-description">
+                <p class="time-info">您在 <strong>${timeAgo}</strong> 剛提交了訂單</p>
+                <p class="waiting-info">我們會在 <strong>24 小時內</strong>透過 IG 回覆確認</p>
+            </div>
+
+            <!-- 摺疊式訂單摘要 -->
+            <div class="order-summary-wrapper">
+                <button id="toggleOrderSummary" class="order-toggle-btn">
+                    <span>📋 查看訂單內容</span>
+                    <span id="toggleArrow" class="order-toggle-arrow">▼</span>
+                </button>
+                <div id="orderSummaryContent" class="order-summary-collapsible">
+                    <div class="order-summary-inner">
+                        <pre class="order-content">${lastOrderData.orderSummary}</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 加購提示卡片 -->
+            <div class="add-purchase-card">
+                <p class="card-title">💡 需要加購或修改訂單嗎？</p>
+                <p class="card-desc">請直接 IG 私訊告知我們</p>
+            </div>
+
+            <!-- 行動按鈕組 -->
+            <div class="modal-actions">
+                <button class="secondary-btn" onclick="closeModal()">
+                    <span class="btn-icon">✓</span>
+                    知道了
+                </button>
+                <button class="primary-btn" onclick="closeAndNavigateIG()">
+                    <span class="btn-icon">💬</span>
+                    前往 IG 私訊
+                </button>
+            </div>
+
+            <!-- 關閉按鈕 -->
+            <button class="modal-close" onclick="closeModal()" aria-label="關閉">×</button>
+        </div>
+    `;
+
+    // 添加摺疊功能
+    setTimeout(() => {
+        const toggleBtn = modal.querySelector('#toggleOrderSummary');
+        const content = modal.querySelector('#orderSummaryContent');
+        const arrow = modal.querySelector('#toggleArrow');
+
+        if (toggleBtn && content && arrow) {
+            toggleBtn.addEventListener('click', () => {
+                const isExpanded = content.classList.contains('expanded');
+
+                if (isExpanded) {
+                    content.classList.remove('expanded');
+                    arrow.classList.remove('expanded');
+                } else {
+                    content.classList.add('expanded');
+                    arrow.classList.add('expanded');
+                }
+            });
+        }
+    }, 100);
+
+    // 添加事件監聽
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+
+    // ESC鍵關閉
+    document.addEventListener('keydown', function escHandler(e) {
+        if (e.key === 'Escape') {
+            closeModal();
+            document.removeEventListener('keydown', escHandler);
+        }
+    });
+
+    return modal;
+}
+
+// 顯示重複訂單警告Modal
+function showDuplicateOrderWarning(lastOrderData, remainingMinutes) {
+    // 創建Modal
+    const modal = createDuplicateOrderModal(lastOrderData, remainingMinutes);
+    document.body.appendChild(modal);
+
+    // 防止背景滾動
+    document.body.style.overflow = 'hidden';
+
+    // 顯示動畫
+    setTimeout(() => {
+        modal.classList.add('show');
+    }, 50);
 }
 
 // 關閉Modal並前往IG

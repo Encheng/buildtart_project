@@ -2000,6 +2000,135 @@ footer {
     transform: translateX(0);
 }
 
+/* 重複訂單 Modal 專屬樣式 */
+.duplicate-modal-content {
+    max-width: 500px;
+}
+
+.duplicate-header {
+    background: linear-gradient(135deg, #D4C4A8 0%, #C4B5A0 100%);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.duplicate-header .success-icon {
+    font-size: 3rem;
+    margin-bottom: 12px;
+}
+
+.duplicate-header h2 {
+    font-size: 1.8rem;
+    color: #5D4E37;
+    margin: 0;
+}
+
+.duplicate-description {
+    text-align: center;
+    margin-bottom: 24px;
+    color: #5D4E37;
+    line-height: 1.8;
+}
+
+.duplicate-description p {
+    margin: 0 0 8px 0;
+}
+
+.duplicate-description .time-info {
+    font-size: 1.1rem;
+}
+
+.duplicate-description .waiting-info {
+    font-size: 1rem;
+    color: #8B7355;
+    margin: 0;
+}
+
+.order-toggle-btn {
+    width: 100%;
+    padding: 16px;
+    background: rgba(212, 196, 168, 0.2);
+    border: 1px solid rgba(139, 115, 85, 0.3);
+    border-radius: 12px;
+    color: #5D4E37;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+    font-family: DFKai-sb, '標楷體', 'BiauKai', 'serif';
+}
+
+.order-toggle-btn:hover {
+    background: rgba(212, 196, 168, 0.3);
+}
+
+.order-toggle-arrow {
+    transition: transform 0.3s ease;
+}
+
+.order-toggle-arrow.expanded {
+    transform: rotate(180deg);
+}
+
+.order-summary-wrapper {
+    margin-bottom: 24px;
+}
+
+.order-summary-collapsible {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.order-summary-collapsible.expanded {
+    max-height: 1000px;
+}
+
+.order-summary-inner {
+    margin-top: 12px;
+    padding: 16px;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid rgba(139, 115, 85, 0.2);
+}
+
+.order-summary-inner .order-content {
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: DFKai-sb, '標楷體', 'BiauKai', 'serif';
+    font-size: 0.95rem;
+    color: #5D4E37;
+    line-height: 1.6;
+}
+
+.add-purchase-card {
+    background: rgba(212, 196, 168, 0.15);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 28px;
+    text-align: center;
+    border: 1px solid rgba(139, 115, 85, 0.2);
+}
+
+.add-purchase-card p {
+    margin: 0;
+}
+
+.add-purchase-card .card-title {
+    margin-bottom: 8px;
+    font-size: 1rem;
+    color: #5D4E37;
+}
+
+.add-purchase-card .card-desc {
+    font-size: 0.95rem;
+    color: #8B7355;
+}
+
 /* 手機版優化 */
 @media (max-width: 768px) {
     .modal-content {
